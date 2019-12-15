@@ -1,0 +1,123 @@
+\@ifundefined {etoctocstyle}{\let \etoc@startlocaltoc \@gobble \let \etoc@settocdepth \@gobble \let \etoc@depthtag \@gobble \let \etoc@setlocaltop \@gobble }{}
+\contentsline {chapter}{\numberline {1}Namespace Index}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Packages}{1}{section.1.1}%
+\contentsline {chapter}{\numberline {2}Class Index}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Class List}{3}{section.2.1}%
+\contentsline {chapter}{\numberline {3}File Index}{5}{chapter.3}%
+\contentsline {section}{\numberline {3.1}File List}{5}{section.3.1}%
+\contentsline {chapter}{\numberline {4}Namespace Documentation}{7}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker Namespace Reference}{7}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Detailed Description}{7}{subsection.4.1.1}%
+\contentsline {chapter}{\numberline {5}Class Documentation}{9}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Audio\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Subsystem Class Reference}{9}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Constructor \& Destructor Documentation}{9}{subsection.5.1.1}%
+\contentsline {subsubsection}{\numberline {5.1.1.1}AudioSubsystem()}{9}{subsubsection.5.1.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Member Function Documentation}{10}{subsection.5.1.2}%
+\contentsline {subsubsection}{\numberline {5.1.2.1}Tick()}{10}{subsubsection.5.1.2.1}%
+\contentsline {section}{\numberline {5.2}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Channel Class Reference}{10}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Member Data Documentation}{11}{subsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.1.1}notes}{11}{subsubsection.5.2.1.1}%
+\contentsline {section}{\numberline {5.3}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Consolex Class Reference}{11}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Detailed Description}{12}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Constructor \& Destructor Documentation}{13}{subsection.5.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.2.1}Consolex()}{13}{subsubsection.5.3.2.1}%
+\contentsline {subsection}{\numberline {5.3.3}Member Function Documentation}{13}{subsection.5.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.3.1}DeleteMenu()}{13}{subsubsection.5.3.3.1}%
+\contentsline {subsubsection}{\numberline {5.3.3.2}GetConsoleWindow()}{14}{subsubsection.5.3.3.2}%
+\contentsline {subsubsection}{\numberline {5.3.3.3}GetKey()}{14}{subsubsection.5.3.3.3}%
+\contentsline {subsubsection}{\numberline {5.3.3.4}GetSystemMenu()}{15}{subsubsection.5.3.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.3.5}handleMovement()}{15}{subsubsection.5.3.3.5}%
+\contentsline {subsubsection}{\numberline {5.3.3.6}RefreshKeys()}{16}{subsubsection.5.3.3.6}%
+\contentsline {subsection}{\numberline {5.3.4}Member Data Documentation}{16}{subsection.5.3.4}%
+\contentsline {subsubsection}{\numberline {5.3.4.1}lastkey}{16}{subsubsection.5.3.4.1}%
+\contentsline {subsection}{\numberline {5.3.5}Property Documentation}{16}{subsection.5.3.5}%
+\contentsline {subsubsection}{\numberline {5.3.5.1}alt}{16}{subsubsection.5.3.5.1}%
+\contentsline {subsubsection}{\numberline {5.3.5.2}control}{16}{subsubsection.5.3.5.2}%
+\contentsline {subsubsection}{\numberline {5.3.5.3}shift}{17}{subsubsection.5.3.5.3}%
+\contentsline {section}{\numberline {5.4}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}effect\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Parameter Struct Reference}{17}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Member Enumeration Documentation}{17}{subsection.5.4.1}%
+\contentsline {subsubsection}{\numberline {5.4.1.1}Type}{17}{subsubsection.5.4.1.1}%
+\contentsline {subsection}{\numberline {5.4.2}Member Data Documentation}{18}{subsection.5.4.2}%
+\contentsline {subsubsection}{\numberline {5.4.2.1}type}{18}{subsubsection.5.4.2.1}%
+\contentsline {subsubsection}{\numberline {5.4.2.2}value}{18}{subsubsection.5.4.2.2}%
+\contentsline {section}{\numberline {5.5}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}G Class Reference}{19}{section.5.5}%
+\contentsline {subsection}{\numberline {5.5.1}Detailed Description}{20}{subsection.5.5.1}%
+\contentsline {subsection}{\numberline {5.5.2}Member Data Documentation}{20}{subsection.5.5.2}%
+\contentsline {subsubsection}{\numberline {5.5.2.1}channels}{20}{subsubsection.5.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.5.2.2}defaultBar}{20}{subsubsection.5.5.2.2}%
+\contentsline {subsubsection}{\numberline {5.5.2.3}depth}{20}{subsubsection.5.5.2.3}%
+\contentsline {subsubsection}{\numberline {5.5.2.4}header}{21}{subsubsection.5.5.2.4}%
+\contentsline {subsubsection}{\numberline {5.5.2.5}Hmove}{21}{subsubsection.5.5.2.5}%
+\contentsline {subsubsection}{\numberline {5.5.2.6}MF\_BYCOMMAND}{21}{subsubsection.5.5.2.6}%
+\contentsline {subsubsection}{\numberline {5.5.2.7}SC\_CLOSE}{21}{subsubsection.5.5.2.7}%
+\contentsline {subsubsection}{\numberline {5.5.2.8}SC\_MAXIMIZE}{21}{subsubsection.5.5.2.8}%
+\contentsline {subsubsection}{\numberline {5.5.2.9}SC\_MINIMIZE}{22}{subsubsection.5.5.2.9}%
+\contentsline {subsubsection}{\numberline {5.5.2.10}SC\_SIZE}{22}{subsubsection.5.5.2.10}%
+\contentsline {subsubsection}{\numberline {5.5.2.11}signature}{22}{subsubsection.5.5.2.11}%
+\contentsline {subsubsection}{\numberline {5.5.2.12}version}{22}{subsubsection.5.5.2.12}%
+\contentsline {subsubsection}{\numberline {5.5.2.13}Vmove}{22}{subsubsection.5.5.2.13}%
+\contentsline {subsubsection}{\numberline {5.5.2.14}width}{22}{subsubsection.5.5.2.14}%
+\contentsline {section}{\numberline {5.6}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Main\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Window Class Reference}{23}{section.5.6}%
+\contentsline {subsection}{\numberline {5.6.1}Constructor \& Destructor Documentation}{24}{subsection.5.6.1}%
+\contentsline {subsubsection}{\numberline {5.6.1.1}MainWindow()}{24}{subsubsection.5.6.1.1}%
+\contentsline {subsection}{\numberline {5.6.2}Member Function Documentation}{24}{subsection.5.6.2}%
+\contentsline {subsubsection}{\numberline {5.6.2.1}HandleMovement()}{24}{subsubsection.5.6.2.1}%
+\contentsline {subsection}{\numberline {5.6.3}Member Data Documentation}{24}{subsection.5.6.3}%
+\contentsline {subsubsection}{\numberline {5.6.3.1}song}{24}{subsubsection.5.6.3.1}%
+\contentsline {section}{\numberline {5.7}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Note Class Reference}{25}{section.5.7}%
+\contentsline {subsection}{\numberline {5.7.1}Member Enumeration Documentation}{26}{subsection.5.7.1}%
+\contentsline {subsubsection}{\numberline {5.7.1.1}N}{26}{subsubsection.5.7.1.1}%
+\contentsline {subsection}{\numberline {5.7.2}Member Function Documentation}{26}{subsection.5.7.2}%
+\contentsline {subsubsection}{\numberline {5.7.2.1}decodeVolume()}{26}{subsubsection.5.7.2.1}%
+\contentsline {subsection}{\numberline {5.7.3}Member Data Documentation}{26}{subsection.5.7.3}%
+\contentsline {subsubsection}{\numberline {5.7.3.1}effect}{27}{subsubsection.5.7.3.1}%
+\contentsline {subsubsection}{\numberline {5.7.3.2}instrument}{27}{subsubsection.5.7.3.2}%
+\contentsline {subsubsection}{\numberline {5.7.3.3}volume}{27}{subsubsection.5.7.3.3}%
+\contentsline {subsection}{\numberline {5.7.4}Property Documentation}{27}{subsection.5.7.4}%
+\contentsline {subsubsection}{\numberline {5.7.4.1}internal\_note}{27}{subsubsection.5.7.4.1}%
+\contentsline {subsubsection}{\numberline {5.7.4.2}note}{27}{subsubsection.5.7.4.2}%
+\contentsline {subsubsection}{\numberline {5.7.4.3}octave}{27}{subsubsection.5.7.4.3}%
+\contentsline {section}{\numberline {5.8}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Pattern Class Reference}{28}{section.5.8}%
+\contentsline {subsection}{\numberline {5.8.1}Constructor \& Destructor Documentation}{28}{subsection.5.8.1}%
+\contentsline {subsubsection}{\numberline {5.8.1.1}Pattern()}{29}{subsubsection.5.8.1.1}%
+\contentsline {subsection}{\numberline {5.8.2}Member Data Documentation}{29}{subsection.5.8.2}%
+\contentsline {subsubsection}{\numberline {5.8.2.1}channels}{29}{subsubsection.5.8.2.1}%
+\contentsline {section}{\numberline {5.9}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Program Class Reference}{29}{section.5.9}%
+\contentsline {subsection}{\numberline {5.9.1}Detailed Description}{29}{subsection.5.9.1}%
+\contentsline {subsection}{\numberline {5.9.2}Member Function Documentation}{30}{subsection.5.9.2}%
+\contentsline {subsubsection}{\numberline {5.9.2.1}Main()}{30}{subsubsection.5.9.2.1}%
+\contentsline {section}{\numberline {5.10}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Song Class Reference}{31}{section.5.10}%
+\contentsline {subsection}{\numberline {5.10.1}Constructor \& Destructor Documentation}{32}{subsection.5.10.1}%
+\contentsline {subsubsection}{\numberline {5.10.1.1}Song()}{32}{subsubsection.5.10.1.1}%
+\contentsline {subsection}{\numberline {5.10.2}Member Function Documentation}{32}{subsection.5.10.2}%
+\contentsline {subsubsection}{\numberline {5.10.2.1}decodePattern()}{32}{subsubsection.5.10.2.1}%
+\contentsline {subsubsection}{\numberline {5.10.2.2}loadfromfile()}{33}{subsubsection.5.10.2.2}%
+\contentsline {subsection}{\numberline {5.10.3}Member Data Documentation}{33}{subsection.5.10.3}%
+\contentsline {subsubsection}{\numberline {5.10.3.1}authorname}{33}{subsubsection.5.10.3.1}%
+\contentsline {subsubsection}{\numberline {5.10.3.2}chanPan}{33}{subsubsection.5.10.3.2}%
+\contentsline {subsubsection}{\numberline {5.10.3.3}chanVol}{33}{subsubsection.5.10.3.3}%
+\contentsline {subsubsection}{\numberline {5.10.3.4}compatibleVersion}{33}{subsubsection.5.10.3.4}%
+\contentsline {subsubsection}{\numberline {5.10.3.5}createdVersion}{33}{subsubsection.5.10.3.5}%
+\contentsline {subsubsection}{\numberline {5.10.3.6}flags}{34}{subsubsection.5.10.3.6}%
+\contentsline {subsubsection}{\numberline {5.10.3.7}globalVol}{34}{subsubsection.5.10.3.7}%
+\contentsline {subsubsection}{\numberline {5.10.3.8}mixVol}{34}{subsubsection.5.10.3.8}%
+\contentsline {subsubsection}{\numberline {5.10.3.9}orders}{34}{subsubsection.5.10.3.9}%
+\contentsline {subsubsection}{\numberline {5.10.3.10}patterns}{34}{subsubsection.5.10.3.10}%
+\contentsline {subsubsection}{\numberline {5.10.3.11}songname}{34}{subsubsection.5.10.3.11}%
+\contentsline {subsubsection}{\numberline {5.10.3.12}speed}{34}{subsubsection.5.10.3.12}%
+\contentsline {subsubsection}{\numberline {5.10.3.13}tempo}{35}{subsubsection.5.10.3.13}%
+\contentsline {section}{\numberline {5.11}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker.\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}volume\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Parameter Struct Reference}{35}{section.5.11}%
+\contentsline {subsection}{\numberline {5.11.1}Member Enumeration Documentation}{35}{subsection.5.11.1}%
+\contentsline {subsubsection}{\numberline {5.11.1.1}Type}{35}{subsubsection.5.11.1.1}%
+\contentsline {subsection}{\numberline {5.11.2}Member Data Documentation}{36}{subsection.5.11.2}%
+\contentsline {subsubsection}{\numberline {5.11.2.1}type}{36}{subsubsection.5.11.2.1}%
+\contentsline {subsubsection}{\numberline {5.11.2.2}value}{36}{subsubsection.5.11.2.2}%
+\contentsline {chapter}{\numberline {6}File Documentation}{37}{chapter.6}%
+\contentsline {section}{\numberline {6.1}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Audio\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Subsystem.cs File Reference}{37}{section.6.1}%
+\contentsline {section}{\numberline {6.2}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Class1.cs File Reference}{37}{section.6.2}%
+\contentsline {section}{\numberline {6.3}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/obj/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Debug/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Temporary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Generated\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}File\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}036\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}C0\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B5\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B-\/1481-\/4323-\/8\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}D20-\/8\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}F5\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}A\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}D\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B23\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}D92.cs File Reference}{38}{section.6.3}%
+\contentsline {section}{\numberline {6.4}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/obj/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Debug/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Temporary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Generated\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}File\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}5937a670-\/0e60-\/4077-\/877b-\/f7221da3dda1.cs File Reference}{38}{section.6.4}%
+\contentsline {section}{\numberline {6.5}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/obj/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Debug/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Temporary\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Generated\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}File\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\_\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}E7\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}A71\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}F73-\/0\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}F8\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}D-\/4\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B9\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B-\/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B56\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}E-\/8\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}E70\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B10\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}B\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}C5\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}D3.cs File Reference}{38}{section.6.5}%
+\contentsline {section}{\numberline {6.6}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Program.cs File Reference}{38}{section.6.6}%
+\contentsline {section}{\numberline {6.7}C\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}:/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Users/moliv/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}One\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Drive/source/repos/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Basic\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Tracker/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Properties/\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Assembly\discretionary {\mbox {\scriptsize $\hookleftarrow $}}{}{}Info.cs File Reference}{38}{section.6.7}%
+\contentsline {chapter}{Index}{39}{section*.63}%

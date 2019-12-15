@@ -1,0 +1,8 @@
+<map id="BasicTracker.Program.Main" name="BasicTracker.Program.Main">
+<area shape="rect" id="node1" title="The main function." alt="" coords="5,79,188,106"/>
+<area shape="rect" id="node2" href="$class_basic_tracker_1_1_consolex.html#a44f4ae0b9fee79d2139607c7802d316f" title="returns the last key from the user" alt="" coords="747,21,951,47"/>
+<area shape="rect" id="node3" href="$class_basic_tracker_1_1_consolex.html#a2c8b2a721cb4a6f4eb7506e5a7c90b7c" title="Handles the cursor movement." alt="" coords="254,43,453,84"/>
+<area shape="rect" id="node5" href="$class_basic_tracker_1_1_consolex.html#a288ed5923467e92e55c1832d7fd09c18" title="Gets a key from the user and set lastkey to it." alt="" coords="236,109,471,135"/>
+<area shape="rect" id="node6" href="$class_basic_tracker_1_1_audio_subsystem.html#ac2b08ec24e6665109de41bb25b5c0bd6" title=" " alt="" coords="239,159,468,186"/>
+<area shape="rect" id="node4" href="$class_basic_tracker_1_1_main_window.html#a7d1d257f8d33a8c221776cff36eea9a3" title=" " alt="" coords="519,43,699,84"/>
+</map>

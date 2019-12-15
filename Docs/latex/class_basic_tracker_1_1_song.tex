@@ -1,0 +1,183 @@
+\hypertarget{class_basic_tracker_1_1_song}{}\doxysection{Basic\+Tracker.\+Song Class Reference}
+\label{class_basic_tracker_1_1_song}\index{BasicTracker.Song@{BasicTracker.Song}}
+
+
+Collaboration diagram for Basic\+Tracker.\+Song\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=183pt]{class_basic_tracker_1_1_song__coll__graph}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_basic_tracker_1_1_song_adc0e9248996ca1049919398533033aea}{Song}} ()
+\item 
+void \mbox{\hyperlink{class_basic_tracker_1_1_song_a25e066e642a7c02ead0155cddb6558e7}{loadfromfile}} (Binary\+Reader br)
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_basic_tracker_1_1_pattern}{Pattern}} \mbox{\hyperlink{class_basic_tracker_1_1_song_aff0c24ff12def6b44051c106cf7dbe83}{decode\+Pattern}} (ushort patlen, ushort rowlen, byte\mbox{[}$\,$\mbox{]} data)
+\end{DoxyCompactItemize}
+\doxysubsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+List$<$ \mbox{\hyperlink{class_basic_tracker_1_1_pattern}{Pattern}} $>$ \mbox{\hyperlink{class_basic_tracker_1_1_song_a6865b0a00f6b5737c628d76a7f3d7fa0}{patterns}}
+\item 
+string \mbox{\hyperlink{class_basic_tracker_1_1_song_ab565c69736ce17c76087324a5866e03c}{songname}}
+\item 
+string \mbox{\hyperlink{class_basic_tracker_1_1_song_aaae20cd2d2a5e2717aee15e33b6e8bbf}{authorname}}
+\item 
+List$<$ ushort $>$ \mbox{\hyperlink{class_basic_tracker_1_1_song_aefd36a0969ff0a8b440ad31b5ae4bcae}{orders}}
+\item 
+ushort \mbox{\hyperlink{class_basic_tracker_1_1_song_acd6db57188a8d4d2a10e7321ee5dd963}{flags}}
+\item 
+Version \mbox{\hyperlink{class_basic_tracker_1_1_song_ad785369e50297926d9a7cc7ac5479bb7}{created\+Version}}
+\item 
+Version \mbox{\hyperlink{class_basic_tracker_1_1_song_a1a01a658f4ed3920a4ef552f601b52b8}{compatible\+Version}}
+\item 
+byte \mbox{\hyperlink{class_basic_tracker_1_1_song_a7ed64447e4e39f5b3ef7722c83cd6cac}{global\+Vol}}
+\item 
+byte \mbox{\hyperlink{class_basic_tracker_1_1_song_a11181d7b53e9e2758d75958aec0c5a7b}{mix\+Vol}}
+\item 
+byte \mbox{\hyperlink{class_basic_tracker_1_1_song_a7d48465d4bf51068c23655d65c1e596b}{speed}}
+\item 
+byte \mbox{\hyperlink{class_basic_tracker_1_1_song_ab02ee34a8f5b55094d25b2466d74c603}{tempo}}
+\item 
+byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{class_basic_tracker_1_1_song_a38612f9c60510b90e100797af076007b}{chan\+Vol}}
+\item 
+byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{class_basic_tracker_1_1_song_adf6f1c7a53da83c1e90a6c0a79bc7450}{chan\+Pan}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_adc0e9248996ca1049919398533033aea}\label{class_basic_tracker_1_1_song_adc0e9248996ca1049919398533033aea}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!Song@{Song}}
+\index{Song@{Song}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{Song()}{Song()}}
+{\footnotesize\ttfamily Basic\+Tracker.\+Song.\+Song (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_aff0c24ff12def6b44051c106cf7dbe83}\label{class_basic_tracker_1_1_song_aff0c24ff12def6b44051c106cf7dbe83}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!decodePattern@{decodePattern}}
+\index{decodePattern@{decodePattern}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{decodePattern()}{decodePattern()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_basic_tracker_1_1_pattern}{Pattern}} Basic\+Tracker.\+Song.\+decode\+Pattern (\begin{DoxyParamCaption}\item[{ushort}]{patlen,  }\item[{ushort}]{rowlen,  }\item[{byte\mbox{[}$\,$\mbox{]}}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_basic_tracker_1_1_song_aff0c24ff12def6b44051c106cf7dbe83_cgraph}
+\end{center}
+\end{figure}
+Here is the caller graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_basic_tracker_1_1_song_aff0c24ff12def6b44051c106cf7dbe83_icgraph}
+\end{center}
+\end{figure}
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a25e066e642a7c02ead0155cddb6558e7}\label{class_basic_tracker_1_1_song_a25e066e642a7c02ead0155cddb6558e7}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!loadfromfile@{loadfromfile}}
+\index{loadfromfile@{loadfromfile}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{loadfromfile()}{loadfromfile()}}
+{\footnotesize\ttfamily void Basic\+Tracker.\+Song.\+loadfromfile (\begin{DoxyParamCaption}\item[{Binary\+Reader}]{br }\end{DoxyParamCaption})}
+
+Here is the call graph for this function\+:\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{class_basic_tracker_1_1_song_a25e066e642a7c02ead0155cddb6558e7_cgraph}
+\end{center}
+\end{figure}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_aaae20cd2d2a5e2717aee15e33b6e8bbf}\label{class_basic_tracker_1_1_song_aaae20cd2d2a5e2717aee15e33b6e8bbf}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!authorname@{authorname}}
+\index{authorname@{authorname}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{authorname}{authorname}}
+{\footnotesize\ttfamily string Basic\+Tracker.\+Song.\+authorname\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_adf6f1c7a53da83c1e90a6c0a79bc7450}\label{class_basic_tracker_1_1_song_adf6f1c7a53da83c1e90a6c0a79bc7450}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!chanPan@{chanPan}}
+\index{chanPan@{chanPan}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{chanPan}{chanPan}}
+{\footnotesize\ttfamily byte \mbox{[}$\,$\mbox{]} Basic\+Tracker.\+Song.\+chan\+Pan\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a38612f9c60510b90e100797af076007b}\label{class_basic_tracker_1_1_song_a38612f9c60510b90e100797af076007b}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!chanVol@{chanVol}}
+\index{chanVol@{chanVol}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{chanVol}{chanVol}}
+{\footnotesize\ttfamily byte \mbox{[}$\,$\mbox{]} Basic\+Tracker.\+Song.\+chan\+Vol\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a1a01a658f4ed3920a4ef552f601b52b8}\label{class_basic_tracker_1_1_song_a1a01a658f4ed3920a4ef552f601b52b8}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!compatibleVersion@{compatibleVersion}}
+\index{compatibleVersion@{compatibleVersion}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{compatibleVersion}{compatibleVersion}}
+{\footnotesize\ttfamily Version Basic\+Tracker.\+Song.\+compatible\+Version\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_ad785369e50297926d9a7cc7ac5479bb7}\label{class_basic_tracker_1_1_song_ad785369e50297926d9a7cc7ac5479bb7}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!createdVersion@{createdVersion}}
+\index{createdVersion@{createdVersion}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{createdVersion}{createdVersion}}
+{\footnotesize\ttfamily Version Basic\+Tracker.\+Song.\+created\+Version\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_acd6db57188a8d4d2a10e7321ee5dd963}\label{class_basic_tracker_1_1_song_acd6db57188a8d4d2a10e7321ee5dd963}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!flags@{flags}}
+\index{flags@{flags}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{flags}{flags}}
+{\footnotesize\ttfamily ushort Basic\+Tracker.\+Song.\+flags\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a7ed64447e4e39f5b3ef7722c83cd6cac}\label{class_basic_tracker_1_1_song_a7ed64447e4e39f5b3ef7722c83cd6cac}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!globalVol@{globalVol}}
+\index{globalVol@{globalVol}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{globalVol}{globalVol}}
+{\footnotesize\ttfamily byte Basic\+Tracker.\+Song.\+global\+Vol\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a11181d7b53e9e2758d75958aec0c5a7b}\label{class_basic_tracker_1_1_song_a11181d7b53e9e2758d75958aec0c5a7b}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!mixVol@{mixVol}}
+\index{mixVol@{mixVol}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{mixVol}{mixVol}}
+{\footnotesize\ttfamily byte Basic\+Tracker.\+Song.\+mix\+Vol\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_aefd36a0969ff0a8b440ad31b5ae4bcae}\label{class_basic_tracker_1_1_song_aefd36a0969ff0a8b440ad31b5ae4bcae}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!orders@{orders}}
+\index{orders@{orders}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{orders}{orders}}
+{\footnotesize\ttfamily List$<$ushort$>$ Basic\+Tracker.\+Song.\+orders\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a6865b0a00f6b5737c628d76a7f3d7fa0}\label{class_basic_tracker_1_1_song_a6865b0a00f6b5737c628d76a7f3d7fa0}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!patterns@{patterns}}
+\index{patterns@{patterns}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{patterns}{patterns}}
+{\footnotesize\ttfamily List$<$\mbox{\hyperlink{class_basic_tracker_1_1_pattern}{Pattern}}$>$ Basic\+Tracker.\+Song.\+patterns\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_ab565c69736ce17c76087324a5866e03c}\label{class_basic_tracker_1_1_song_ab565c69736ce17c76087324a5866e03c}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!songname@{songname}}
+\index{songname@{songname}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{songname}{songname}}
+{\footnotesize\ttfamily string Basic\+Tracker.\+Song.\+songname\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_a7d48465d4bf51068c23655d65c1e596b}\label{class_basic_tracker_1_1_song_a7d48465d4bf51068c23655d65c1e596b}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!speed@{speed}}
+\index{speed@{speed}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{speed}{speed}}
+{\footnotesize\ttfamily byte Basic\+Tracker.\+Song.\+speed\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_basic_tracker_1_1_song_ab02ee34a8f5b55094d25b2466d74c603}\label{class_basic_tracker_1_1_song_ab02ee34a8f5b55094d25b2466d74c603}} 
+\index{BasicTracker.Song@{BasicTracker.Song}!tempo@{tempo}}
+\index{tempo@{tempo}!BasicTracker.Song@{BasicTracker.Song}}
+\doxysubsubsection{\texorpdfstring{tempo}{tempo}}
+{\footnotesize\ttfamily byte Basic\+Tracker.\+Song.\+tempo\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+C\+:/\+Users/moliv/\+One\+Drive/source/repos/\+Basic\+Tracker/\+Basic\+Tracker/\mbox{\hyperlink{_program_8cs}{Program.\+cs}}\end{DoxyCompactItemize}

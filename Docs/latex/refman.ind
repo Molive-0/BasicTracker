@@ -1,0 +1,438 @@
+\begin{theindex}
+
+  \item {\_0}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {A}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {A\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {Ab}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {alt}
+    \subitem {BasicTracker.Consolex}, \hyperpage{16}
+  \item {AudioSubsystem}
+    \subitem {BasicTracker.AudioSubsystem}, \hyperpage{9}
+  \item {authorname}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+
+  \indexspace
+
+  \item {B}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {B\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {BasicTracker}, \hyperpage{7}
+  \item {BasicTracker.AudioSubsystem}, \hyperpage{9}
+    \subitem {AudioSubsystem}, \hyperpage{9}
+    \subitem {Tick}, \hyperpage{10}
+  \item {BasicTracker.Channel}, \hyperpage{10}
+    \subitem {notes}, \hyperpage{11}
+  \item {BasicTracker.Consolex}, \hyperpage{11}
+    \subitem {alt}, \hyperpage{16}
+    \subitem {Consolex}, \hyperpage{13}
+    \subitem {control}, \hyperpage{16}
+    \subitem {DeleteMenu}, \hyperpage{13}
+    \subitem {GetConsoleWindow}, \hyperpage{13}
+    \subitem {GetKey}, \hyperpage{14}
+    \subitem {GetSystemMenu}, \hyperpage{14}
+    \subitem {handleMovement}, \hyperpage{15}
+    \subitem {lastkey}, \hyperpage{16}
+    \subitem {RefreshKeys}, \hyperpage{15}
+    \subitem {shift}, \hyperpage{16}
+  \item {BasicTracker.effectParameter}, \hyperpage{17}
+    \subitem {\_0}, \hyperpage{18}
+    \subitem {A}, \hyperpage{18}
+    \subitem {B}, \hyperpage{18}
+    \subitem {C}, \hyperpage{18}
+    \subitem {D}, \hyperpage{18}
+    \subitem {E}, \hyperpage{18}
+    \subitem {F}, \hyperpage{18}
+    \subitem {G}, \hyperpage{18}
+    \subitem {H}, \hyperpage{18}
+    \subitem {I}, \hyperpage{18}
+    \subitem {J}, \hyperpage{18}
+    \subitem {K}, \hyperpage{18}
+    \subitem {L}, \hyperpage{18}
+    \subitem {M}, \hyperpage{18}
+    \subitem {N}, \hyperpage{18}
+    \subitem {O}, \hyperpage{18}
+    \subitem {P}, \hyperpage{18}
+    \subitem {Q}, \hyperpage{18}
+    \subitem {R}, \hyperpage{18}
+    \subitem {S}, \hyperpage{18}
+    \subitem {T}, \hyperpage{18}
+    \subitem {Type}, \hyperpage{17}
+    \subitem {type}, \hyperpage{18}
+    \subitem {U}, \hyperpage{18}
+    \subitem {V}, \hyperpage{18}
+    \subitem {value}, \hyperpage{18}
+    \subitem {W}, \hyperpage{18}
+    \subitem {X}, \hyperpage{18}
+    \subitem {Y}, \hyperpage{18}
+    \subitem {Z}, \hyperpage{18}
+  \item {BasicTracker.G}, \hyperpage{19}
+    \subitem {channels}, \hyperpage{20}
+    \subitem {defaultBar}, \hyperpage{20}
+    \subitem {depth}, \hyperpage{20}
+    \subitem {header}, \hyperpage{20}
+    \subitem {Hmove}, \hyperpage{21}
+    \subitem {MF\_BYCOMMAND}, \hyperpage{21}
+    \subitem {SC\_CLOSE}, \hyperpage{21}
+    \subitem {SC\_MAXIMIZE}, \hyperpage{21}
+    \subitem {SC\_MINIMIZE}, \hyperpage{21}
+    \subitem {SC\_SIZE}, \hyperpage{22}
+    \subitem {signature}, \hyperpage{22}
+    \subitem {version}, \hyperpage{22}
+    \subitem {Vmove}, \hyperpage{22}
+    \subitem {width}, \hyperpage{22}
+  \item {BasicTracker.MainWindow}, \hyperpage{23}
+    \subitem {HandleMovement}, \hyperpage{24}
+    \subitem {MainWindow}, \hyperpage{24}
+    \subitem {song}, \hyperpage{24}
+  \item {BasicTracker.Note}, \hyperpage{25}
+    \subitem {A\_}, \hyperpage{26}
+    \subitem {Ab}, \hyperpage{26}
+    \subitem {B\_}, \hyperpage{26}
+    \subitem {Bb}, \hyperpage{26}
+    \subitem {C\_}, \hyperpage{26}
+    \subitem {D\_}, \hyperpage{26}
+    \subitem {Db}, \hyperpage{26}
+    \subitem {decodeVolume}, \hyperpage{26}
+    \subitem {E\_}, \hyperpage{26}
+    \subitem {Eb}, \hyperpage{26}
+    \subitem {effect}, \hyperpage{26}
+    \subitem {EMPTY}, \hyperpage{26}
+    \subitem {END}, \hyperpage{26}
+    \subitem {F\_}, \hyperpage{26}
+    \subitem {G\_}, \hyperpage{26}
+    \subitem {Gb}, \hyperpage{26}
+    \subitem {instrument}, \hyperpage{27}
+    \subitem {internal\_note}, \hyperpage{27}
+    \subitem {N}, \hyperpage{26}
+    \subitem {note}, \hyperpage{27}
+    \subitem {octave}, \hyperpage{27}
+    \subitem {volume}, \hyperpage{27}
+  \item {BasicTracker.Pattern}, \hyperpage{28}
+    \subitem {channels}, \hyperpage{29}
+    \subitem {Pattern}, \hyperpage{28}
+  \item {BasicTracker.Program}, \hyperpage{29}
+    \subitem {Main}, \hyperpage{30}
+  \item {BasicTracker.Song}, \hyperpage{31}
+    \subitem {authorname}, \hyperpage{33}
+    \subitem {chanPan}, \hyperpage{33}
+    \subitem {chanVol}, \hyperpage{33}
+    \subitem {compatibleVersion}, \hyperpage{33}
+    \subitem {createdVersion}, \hyperpage{33}
+    \subitem {decodePattern}, \hyperpage{32}
+    \subitem {flags}, \hyperpage{33}
+    \subitem {globalVol}, \hyperpage{34}
+    \subitem {loadfromfile}, \hyperpage{32}
+    \subitem {mixVol}, \hyperpage{34}
+    \subitem {orders}, \hyperpage{34}
+    \subitem {patterns}, \hyperpage{34}
+    \subitem {Song}, \hyperpage{32}
+    \subitem {songname}, \hyperpage{34}
+    \subitem {speed}, \hyperpage{34}
+    \subitem {tempo}, \hyperpage{34}
+  \item {BasicTracker.volumeParameter}, \hyperpage{35}
+    \subitem {A}, \hyperpage{36}
+    \subitem {B}, \hyperpage{36}
+    \subitem {C}, \hyperpage{36}
+    \subitem {D}, \hyperpage{36}
+    \subitem {E}, \hyperpage{36}
+    \subitem {F}, \hyperpage{36}
+    \subitem {G}, \hyperpage{36}
+    \subitem {H}, \hyperpage{36}
+    \subitem {P}, \hyperpage{36}
+    \subitem {Type}, \hyperpage{35}
+    \subitem {type}, \hyperpage{36}
+    \subitem {V}, \hyperpage{36}
+    \subitem {value}, \hyperpage{36}
+  \item {Bb}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+
+  \indexspace
+
+  \item {C}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/AudioSubsystem.cs}, 
+		\hyperpage{37}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/Class1.cs}, 
+		\hyperpage{37}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/obj/Debug/TemporaryGeneratedFile\_036C0B5B-\/1481-\/4323-\/8D20-\/8F5ADCB23D92.cs}, 
+		\hyperpage{38}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/obj/Debug/TemporaryGeneratedFile\_5937a670-\/0e60-\/4077-\/877b-\/f7221da3dda1.cs}, 
+		\hyperpage{38}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/obj/Debug/TemporaryGeneratedFile\_E7A71F73-\/0F8D-\/4B9B-\/B56E-\/8E70B10BC5D3.cs}, 
+		\hyperpage{38}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/Program.cs}, 
+		\hyperpage{38}
+  \item {C:/Users/moliv/OneDrive/source/repos/BasicTracker/BasicTracker/Properties/AssemblyInfo.cs}, 
+		\hyperpage{38}
+  \item {C\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {channels}
+    \subitem {BasicTracker.G}, \hyperpage{20}
+    \subitem {BasicTracker.Pattern}, \hyperpage{29}
+  \item {chanPan}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+  \item {chanVol}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+  \item {compatibleVersion}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+  \item {Consolex}
+    \subitem {BasicTracker.Consolex}, \hyperpage{13}
+  \item {control}
+    \subitem {BasicTracker.Consolex}, \hyperpage{16}
+  \item {createdVersion}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+
+  \indexspace
+
+  \item {D}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {D\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {Db}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {decodePattern}
+    \subitem {BasicTracker.Song}, \hyperpage{32}
+  \item {decodeVolume}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {defaultBar}
+    \subitem {BasicTracker.G}, \hyperpage{20}
+  \item {DeleteMenu}
+    \subitem {BasicTracker.Consolex}, \hyperpage{13}
+  \item {depth}
+    \subitem {BasicTracker.G}, \hyperpage{20}
+
+  \indexspace
+
+  \item {E}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {E\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {Eb}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {effect}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {EMPTY}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {END}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+
+  \indexspace
+
+  \item {F}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {F\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {flags}
+    \subitem {BasicTracker.Song}, \hyperpage{33}
+
+  \indexspace
+
+  \item {G}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {G\_}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {Gb}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {GetConsoleWindow}
+    \subitem {BasicTracker.Consolex}, \hyperpage{13}
+  \item {GetKey}
+    \subitem {BasicTracker.Consolex}, \hyperpage{14}
+  \item {GetSystemMenu}
+    \subitem {BasicTracker.Consolex}, \hyperpage{14}
+  \item {globalVol}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+
+  \indexspace
+
+  \item {H}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {HandleMovement}
+    \subitem {BasicTracker.MainWindow}, \hyperpage{24}
+  \item {handleMovement}
+    \subitem {BasicTracker.Consolex}, \hyperpage{15}
+  \item {header}
+    \subitem {BasicTracker.G}, \hyperpage{20}
+  \item {Hmove}
+    \subitem {BasicTracker.G}, \hyperpage{21}
+
+  \indexspace
+
+  \item {I}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {instrument}
+    \subitem {BasicTracker.Note}, \hyperpage{27}
+  \item {internal\_note}
+    \subitem {BasicTracker.Note}, \hyperpage{27}
+
+  \indexspace
+
+  \item {J}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {K}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {L}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {lastkey}
+    \subitem {BasicTracker.Consolex}, \hyperpage{16}
+  \item {loadfromfile}
+    \subitem {BasicTracker.Song}, \hyperpage{32}
+
+  \indexspace
+
+  \item {M}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {Main}
+    \subitem {BasicTracker.Program}, \hyperpage{30}
+  \item {MainWindow}
+    \subitem {BasicTracker.MainWindow}, \hyperpage{24}
+  \item {MF\_BYCOMMAND}
+    \subitem {BasicTracker.G}, \hyperpage{21}
+  \item {mixVol}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+
+  \indexspace
+
+  \item {N}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.Note}, \hyperpage{26}
+  \item {note}
+    \subitem {BasicTracker.Note}, \hyperpage{27}
+  \item {notes}
+    \subitem {BasicTracker.Channel}, \hyperpage{11}
+
+  \indexspace
+
+  \item {O}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {octave}
+    \subitem {BasicTracker.Note}, \hyperpage{27}
+  \item {orders}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+
+  \indexspace
+
+  \item {P}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {Pattern}
+    \subitem {BasicTracker.Pattern}, \hyperpage{28}
+  \item {patterns}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+
+  \indexspace
+
+  \item {Q}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {R}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {RefreshKeys}
+    \subitem {BasicTracker.Consolex}, \hyperpage{15}
+
+  \indexspace
+
+  \item {S}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {SC\_CLOSE}
+    \subitem {BasicTracker.G}, \hyperpage{21}
+  \item {SC\_MAXIMIZE}
+    \subitem {BasicTracker.G}, \hyperpage{21}
+  \item {SC\_MINIMIZE}
+    \subitem {BasicTracker.G}, \hyperpage{21}
+  \item {SC\_SIZE}
+    \subitem {BasicTracker.G}, \hyperpage{22}
+  \item {shift}
+    \subitem {BasicTracker.Consolex}, \hyperpage{16}
+  \item {signature}
+    \subitem {BasicTracker.G}, \hyperpage{22}
+  \item {Song}
+    \subitem {BasicTracker.Song}, \hyperpage{32}
+  \item {song}
+    \subitem {BasicTracker.MainWindow}, \hyperpage{24}
+  \item {songname}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+  \item {speed}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+
+  \indexspace
+
+  \item {T}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {tempo}
+    \subitem {BasicTracker.Song}, \hyperpage{34}
+  \item {Tick}
+    \subitem {BasicTracker.AudioSubsystem}, \hyperpage{10}
+  \item {Type}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{17}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{35}
+  \item {type}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+
+  \indexspace
+
+  \item {U}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {V}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {value}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+    \subitem {BasicTracker.volumeParameter}, \hyperpage{36}
+  \item {version}
+    \subitem {BasicTracker.G}, \hyperpage{22}
+  \item {Vmove}
+    \subitem {BasicTracker.G}, \hyperpage{22}
+  \item {volume}
+    \subitem {BasicTracker.Note}, \hyperpage{27}
+
+  \indexspace
+
+  \item {W}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+  \item {width}
+    \subitem {BasicTracker.G}, \hyperpage{22}
+
+  \indexspace
+
+  \item {X}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {Y}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+  \indexspace
+
+  \item {Z}
+    \subitem {BasicTracker.effectParameter}, \hyperpage{18}
+
+\end{theindex}
