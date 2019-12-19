@@ -98,6 +98,9 @@ $(document).ready(function(){initNavTree('class_basic_tracker_1_1_note.html','')
 <div class="title">BasicTracker.Note Class Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>A single note.  
+ <a href="class_basic_tracker_1_1_note.html#details">More...</a></p>
 <div class="dynheader">
 Collaboration diagram for BasicTracker.Note:</div>
 <div class="dyncontent">
@@ -126,16 +129,19 @@ Public Types</h2></td></tr>
 <a class="el" href="class_basic_tracker_1_1_note.html#a6a6378433e7f24867117ca44964863b7aba2b45bdc11e2a4a6e86aab2ac693cbb">N.EMPTY</a> = 255
 <br />
  }</td></tr>
+<tr class="memdesc:a6a6378433e7f24867117ca44964863b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">The note value.  <a href="class_basic_tracker_1_1_note.html#a6a6378433e7f24867117ca44964863b7">More...</a><br /></td></tr>
 <tr class="separator:a6a6378433e7f24867117ca44964863b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a2614596470ab7dcc0b88030eb3758561"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_basic_tracker_1_1volume_parameter.html">volumeParameter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_basic_tracker_1_1_note.html#a2614596470ab7dcc0b88030eb3758561">decodeVolume</a> (byte vol)</td></tr>
+<tr class="memdesc:a2614596470ab7dcc0b88030eb3758561"><td class="mdescLeft">&#160;</td><td class="mdescRight">part of the file loading. Decodes what effect is in the volume column because of course.  <a href="class_basic_tracker_1_1_note.html#a2614596470ab7dcc0b88030eb3758561">More...</a><br /></td></tr>
 <tr class="separator:a2614596470ab7dcc0b88030eb3758561"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:aa25a0c572e98401d75e41c8ae14e2dac"><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_basic_tracker_1_1_note.html#aa25a0c572e98401d75e41c8ae14e2dac">instrument</a></td></tr>
+<tr class="memdesc:aa25a0c572e98401d75e41c8ae14e2dac"><td class="mdescLeft">&#160;</td><td class="mdescRight">The instrument.  <a href="class_basic_tracker_1_1_note.html#aa25a0c572e98401d75e41c8ae14e2dac">More...</a><br /></td></tr>
 <tr class="separator:aa25a0c572e98401d75e41c8ae14e2dac"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a86a44bb70d9db03164c04582af46c0cd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_basic_tracker_1_1volume_parameter.html">volumeParameter</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_basic_tracker_1_1_note.html#a86a44bb70d9db03164c04582af46c0cd">volume</a></td></tr>
 <tr class="separator:a86a44bb70d9db03164c04582af46c0cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,9 +155,13 @@ Properties</h2></td></tr>
 <tr class="memitem:a705a7d889266386aa60911a884736439"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_basic_tracker_1_1_note.html#a705a7d889266386aa60911a884736439">octave</a><code> [get, private set]</code></td></tr>
 <tr class="separator:a705a7d889266386aa60911a884736439"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adfdc8cd70ac05cfd4fea33a0b086c251"><td class="memItemLeft" align="right" valign="top">byte&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_basic_tracker_1_1_note.html#adfdc8cd70ac05cfd4fea33a0b086c251">internal_note</a><code> [set, private get]</code></td></tr>
+<tr class="memdesc:adfdc8cd70ac05cfd4fea33a0b086c251"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the internal note to the note and octave for later retrieval.  <a href="class_basic_tracker_1_1_note.html#adfdc8cd70ac05cfd4fea33a0b086c251">More...</a><br /></td></tr>
 <tr class="separator:adfdc8cd70ac05cfd4fea33a0b086c251"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Enumeration Documentation</h2>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>A single note. </p>
+<p>The grid is made of these. Stores the value, instrument, volume, effect and effect parameter. </p>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a6a6378433e7f24867117ca44964863b7"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a6a6378433e7f24867117ca44964863b7">&#9670;&nbsp;</a></span>N</h2>
 
@@ -171,19 +181,33 @@ Properties</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>The note value. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a064f80da74aefbacf50e14cbc69bc6a7"></a>C_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a1f51be0dc5971b918e74fcc59935234d"></a>Db&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a887dd2a79f526ab400c4301868402aa1"></a>D_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a79db15b36e6310c0bf93c3b009b42daf"></a>Eb&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7aef27bb8bdb4e240634c560147af8bdf8"></a>E_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a73430508d6320c70cf31de76df45186d"></a>F_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a1c717215e36a6768f37353c8f554a7d8"></a>Gb&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a604cb0fc9dc1139b56073f2bd9fb6f7e"></a>G_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a0e4c46df226b9c0cb391311c54f28efe"></a>Ab&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ac57bbdcbfba558e3d23b60edde831e85"></a>A_&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ad526f1c8ef6c1e4e980e2b8471352d23"></a>Bb&#160;</td><td class="fielddoc"></td></tr>
-<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ae1eec1722bb8400f0df6cbfa52ac82c2"></a>B_&#160;</td><td class="fielddoc"></td></tr>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a064f80da74aefbacf50e14cbc69bc6a7"></a>C_&#160;</td><td class="fielddoc"><p>C. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a1f51be0dc5971b918e74fcc59935234d"></a>Db&#160;</td><td class="fielddoc"><p>D flat. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a887dd2a79f526ab400c4301868402aa1"></a>D_&#160;</td><td class="fielddoc"><p>D. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a79db15b36e6310c0bf93c3b009b42daf"></a>Eb&#160;</td><td class="fielddoc"><p>E flat. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7aef27bb8bdb4e240634c560147af8bdf8"></a>E_&#160;</td><td class="fielddoc"><p>E. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a73430508d6320c70cf31de76df45186d"></a>F_&#160;</td><td class="fielddoc"><p>F. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a1c717215e36a6768f37353c8f554a7d8"></a>Gb&#160;</td><td class="fielddoc"><p><a class="el" href="class_basic_tracker_1_1_g.html" title="Global constants.">G</a> flat. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a604cb0fc9dc1139b56073f2bd9fb6f7e"></a>G_&#160;</td><td class="fielddoc"><p><a class="el" href="class_basic_tracker_1_1_g.html" title="Global constants.">G</a>. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7a0e4c46df226b9c0cb391311c54f28efe"></a>Ab&#160;</td><td class="fielddoc"><p>A flat. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ac57bbdcbfba558e3d23b60edde831e85"></a>A_&#160;</td><td class="fielddoc"><p>A. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ad526f1c8ef6c1e4e980e2b8471352d23"></a>Bb&#160;</td><td class="fielddoc"><p>B flat. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ae1eec1722bb8400f0df6cbfa52ac82c2"></a>B_&#160;</td><td class="fielddoc"><p>B. </p>
+</td></tr>
 <tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7ab1a326c06d88bf042f73d70f50197905"></a>END&#160;</td><td class="fielddoc"><p>end note, stop channel (===) </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a6a6378433e7f24867117ca44964863b7aba2b45bdc11e2a4a6e86aab2ac693cbb"></a>EMPTY&#160;</td><td class="fielddoc"><p>undefined, yet to be input (-_-) </p>
@@ -208,6 +232,9 @@ Properties</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>part of the file loading. Decodes what effect is in the volume column because of course. </p>
+<p>Removed most of this code to simplify the tracker. It's a shame but I simply can't implement all of this in the time allotted. </p>
 <div class="dynheader">
 Here is the caller graph for this function:</div>
 <div class="dyncontent">
@@ -242,6 +269,8 @@ Here is the caller graph for this function:</div>
         </tr>
       </table>
 </div><div class="memdoc">
+
+<p>The instrument. </p>
 
 </div>
 </div>
@@ -279,6 +308,8 @@ Here is the caller graph for this function:</div>
   </tr>
 </table>
 </div><div class="memdoc">
+
+<p>Set the internal note to the note and octave for later retrieval. </p>
 
 </div>
 </div>

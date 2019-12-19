@@ -3,9 +3,10 @@ var files_dup =
     [ "obj", "dir_43724e81dd40e09f32417973865cdd64.html", "dir_43724e81dd40e09f32417973865cdd64" ],
     [ "Properties", "dir_d051c76eebdc544d9c3d734575641c72.html", "dir_d051c76eebdc544d9c3d734575641c72" ],
     [ "AudioSubsystem.cs", "_audio_subsystem_8cs.html", [
-      [ "AudioSubsystem", "class_basic_tracker_1_1_audio_subsystem.html", "class_basic_tracker_1_1_audio_subsystem" ]
+      [ "AudioSubsystem", "class_basic_tracker_1_1_audio_subsystem.html", "class_basic_tracker_1_1_audio_subsystem" ],
+      [ "TrackerStream", "class_basic_tracker_1_1_audio_subsystem_1_1_tracker_stream.html", "class_basic_tracker_1_1_audio_subsystem_1_1_tracker_stream" ]
     ] ],
-    [ "Class1.cs", "_class1_8cs.html", [
+    [ "MainWindow.cs", "_main_window_8cs.html", [
       [ "MainWindow", "class_basic_tracker_1_1_main_window.html", "class_basic_tracker_1_1_main_window" ]
     ] ],
     [ "Program.cs", "_program_8cs.html", [

@@ -2,6 +2,11 @@
 \label{class_basic_tracker_1_1_note}\index{BasicTracker.Note@{BasicTracker.Note}}
 
 
+A single note.  
+
+
+
+
 Collaboration diagram for Basic\+Tracker.\+Note\+:\nopagebreak
 \begin{figure}[H]
 \begin{center}
@@ -31,17 +36,17 @@ enum \mbox{\hyperlink{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca449648
 \mbox{\hyperlink{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ab1a326c06d88bf042f73d70f50197905}{N.\+E\+ND}} = 254, 
 \mbox{\hyperlink{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7aba2b45bdc11e2a4a6e86aab2ac693cbb}{N.\+E\+M\+P\+TY}} = 255
  \}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em The note value. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\hyperlink{struct_basic_tracker_1_1volume_parameter}{volume\+Parameter}} \mbox{\hyperlink{class_basic_tracker_1_1_note_a2614596470ab7dcc0b88030eb3758561}{decode\+Volume}} (byte vol)
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em part of the file loading. Decodes what effect is in the volume column because of course. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
 byte \mbox{\hyperlink{class_basic_tracker_1_1_note_aa25a0c572e98401d75e41c8ae14e2dac}{instrument}}
-\item 
+\begin{DoxyCompactList}\small\item\em The instrument. \end{DoxyCompactList}\item 
 \mbox{\hyperlink{struct_basic_tracker_1_1volume_parameter}{volume\+Parameter}} \mbox{\hyperlink{class_basic_tracker_1_1_note_a86a44bb70d9db03164c04582af46c0cd}{volume}}
 \item 
 \mbox{\hyperlink{struct_basic_tracker_1_1effect_parameter}{effect\+Parameter}} \mbox{\hyperlink{class_basic_tracker_1_1_note_a7f5bc0467cd5ba324a7730b2218fecff}{effect}}
@@ -54,8 +59,13 @@ byte \mbox{\hyperlink{class_basic_tracker_1_1_note_aa25a0c572e98401d75e41c8ae14e
 int \mbox{\hyperlink{class_basic_tracker_1_1_note_a705a7d889266386aa60911a884736439}{octave}}\hspace{0.3cm}{\ttfamily  \mbox{[}get, private set\mbox{]}}
 \item 
 byte \mbox{\hyperlink{class_basic_tracker_1_1_note_adfdc8cd70ac05cfd4fea33a0b086c251}{internal\+\_\+note}}\hspace{0.3cm}{\ttfamily  \mbox{[}set, private get\mbox{]}}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Set the internal note to the note and octave for later retrieval. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
+
+\doxysubsection{Detailed Description}
+A single note. 
+
+The grid is made of these. Stores the value, instrument, volume, effect and effect parameter. 
 
 \doxysubsection{Member Enumeration Documentation}
 \mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7}} 
@@ -64,53 +74,57 @@ byte \mbox{\hyperlink{class_basic_tracker_1_1_note_adfdc8cd70ac05cfd4fea33a0b086
 \doxysubsubsection{\texorpdfstring{N}{N}}
 {\footnotesize\ttfamily enum \mbox{\hyperlink{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7}{Basic\+Tracker.\+Note.\+N}}\hspace{0.3cm}{\ttfamily [strong]}}
 
+
+
+The note value. 
+
 \begin{DoxyEnumFields}{Enumerator}
 \raisebox{\heightof{T}}[0pt][0pt]{\index{C\_@{C\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!C\_@{C\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a064f80da74aefbacf50e14cbc69bc6a7}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a064f80da74aefbacf50e14cbc69bc6a7}} 
-C\+\_\+&\\
+C\+\_\+&C. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Db@{Db}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!Db@{Db}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a1f51be0dc5971b918e74fcc59935234d}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a1f51be0dc5971b918e74fcc59935234d}} 
-Db&\\
+Db&D flat. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{D\_@{D\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!D\_@{D\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a887dd2a79f526ab400c4301868402aa1}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a887dd2a79f526ab400c4301868402aa1}} 
-D\+\_\+&\\
+D\+\_\+&D. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Eb@{Eb}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!Eb@{Eb}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a79db15b36e6310c0bf93c3b009b42daf}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a79db15b36e6310c0bf93c3b009b42daf}} 
-Eb&\\
+Eb&E flat. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{E\_@{E\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!E\_@{E\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7aef27bb8bdb4e240634c560147af8bdf8}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7aef27bb8bdb4e240634c560147af8bdf8}} 
-E\+\_\+&\\
+E\+\_\+&E. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{F\_@{F\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!F\_@{F\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a73430508d6320c70cf31de76df45186d}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a73430508d6320c70cf31de76df45186d}} 
-F\+\_\+&\\
+F\+\_\+&F. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Gb@{Gb}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!Gb@{Gb}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a1c717215e36a6768f37353c8f554a7d8}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a1c717215e36a6768f37353c8f554a7d8}} 
-Gb&\\
+Gb&\mbox{\hyperlink{class_basic_tracker_1_1_g}{G}} flat. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{G\_@{G\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!G\_@{G\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a604cb0fc9dc1139b56073f2bd9fb6f7e}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a604cb0fc9dc1139b56073f2bd9fb6f7e}} 
-G\+\_\+&\\
+G\+\_\+&\mbox{\hyperlink{class_basic_tracker_1_1_g}{G}}. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Ab@{Ab}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!Ab@{Ab}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a0e4c46df226b9c0cb391311c54f28efe}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7a0e4c46df226b9c0cb391311c54f28efe}} 
-Ab&\\
+Ab&A flat. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{A\_@{A\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!A\_@{A\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ac57bbdcbfba558e3d23b60edde831e85}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ac57bbdcbfba558e3d23b60edde831e85}} 
-A\+\_\+&\\
+A\+\_\+&A. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{Bb@{Bb}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!Bb@{Bb}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ad526f1c8ef6c1e4e980e2b8471352d23}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ad526f1c8ef6c1e4e980e2b8471352d23}} 
-Bb&\\
+Bb&B flat. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{B\_@{B\_}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!B\_@{B\_}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ae1eec1722bb8400f0df6cbfa52ac82c2}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ae1eec1722bb8400f0df6cbfa52ac82c2}} 
-B\+\_\+&\\
+B\+\_\+&B. \\
 \hline
 
 \raisebox{\heightof{T}}[0pt][0pt]{\index{END@{END}!BasicTracker.Note@{BasicTracker.Note}}\index{BasicTracker.Note@{BasicTracker.Note}!END@{END}}}\mbox{\Hypertarget{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ab1a326c06d88bf042f73d70f50197905}\label{class_basic_tracker_1_1_note_a6a6378433e7f24867117ca44964863b7ab1a326c06d88bf042f73d70f50197905}} 
@@ -131,7 +145,11 @@ E\+M\+P\+TY&undefined, yet to be input (-\/\+\_\+-\/) \\
 \doxysubsubsection{\texorpdfstring{decodeVolume()}{decodeVolume()}}
 {\footnotesize\ttfamily \mbox{\hyperlink{struct_basic_tracker_1_1volume_parameter}{volume\+Parameter}} Basic\+Tracker.\+Note.\+decode\+Volume (\begin{DoxyParamCaption}\item[{byte}]{vol }\end{DoxyParamCaption})}
 
-Here is the caller graph for this function\+:\nopagebreak
+
+
+part of the file loading. Decodes what effect is in the volume column because of course. 
+
+Removed most of this code to simplify the tracker. It\textquotesingle{}s a shame but I simply can\textquotesingle{}t implement all of this in the time allotted. Here is the caller graph for this function\+:\nopagebreak
 \begin{figure}[H]
 \begin{center}
 \leavevmode
@@ -153,6 +171,10 @@ Here is the caller graph for this function\+:\nopagebreak
 \doxysubsubsection{\texorpdfstring{instrument}{instrument}}
 {\footnotesize\ttfamily byte Basic\+Tracker.\+Note.\+instrument}
 
+
+
+The instrument. 
+
 \mbox{\Hypertarget{class_basic_tracker_1_1_note_a86a44bb70d9db03164c04582af46c0cd}\label{class_basic_tracker_1_1_note_a86a44bb70d9db03164c04582af46c0cd}} 
 \index{BasicTracker.Note@{BasicTracker.Note}!volume@{volume}}
 \index{volume@{volume}!BasicTracker.Note@{BasicTracker.Note}}
@@ -167,6 +189,10 @@ Here is the caller graph for this function\+:\nopagebreak
 \index{internal\_note@{internal\_note}!BasicTracker.Note@{BasicTracker.Note}}
 \doxysubsubsection{\texorpdfstring{internal\_note}{internal\_note}}
 {\footnotesize\ttfamily byte Basic\+Tracker.\+Note.\+internal\+\_\+note\hspace{0.3cm}{\ttfamily [set]}, {\ttfamily [private get]}}
+
+
+
+Set the internal note to the note and octave for later retrieval. 
 
 \mbox{\Hypertarget{class_basic_tracker_1_1_note_ae6b55aaf2e7d109fe98df278605d1d83}\label{class_basic_tracker_1_1_note_ae6b55aaf2e7d109fe98df278605d1d83}} 
 \index{BasicTracker.Note@{BasicTracker.Note}!note@{note}}

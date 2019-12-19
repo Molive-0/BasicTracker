@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['octave_226',['octave',['../class_basic_tracker_1_1_note.html#a705a7d889266386aa60911a884736439',1,'BasicTracker::Note']]]
+  ['note_233',['note',['../class_basic_tracker_1_1_note.html#ae6b55aaf2e7d109fe98df278605d1d83',1,'BasicTracker::Note']]]
 ];

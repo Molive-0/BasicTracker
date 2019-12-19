@@ -55,11 +55,11 @@ namespace BasicTracker
          */
         static void Main(string[] args)
         {
+            AudioSubsystem.init(); // We call the constructor on the Audio section after we've inited other things.
             do
             {
                 Consolex.RefreshKeys();
                 Consolex.handleMovement();
-                AudioSubsystem.Tick();
             } while (Consolex.GetKey() != ConsoleKey.Escape);
         }
     }
@@ -156,7 +156,7 @@ namespace BasicTracker
          * they can't do in the original console, such at control moving far and F1 loading
          * help. If there is no key available it is non blocking, and will set it to null instead.
          */
-        internal static void RefreshKeys()
+        public static void RefreshKeys()
         {
             if (Console.KeyAvailable)
             {
@@ -171,40 +171,49 @@ namespace BasicTracker
             else lastkey = null;
         }
     }
-
+    //! Data structure for all things related to the song itself
+    /*! Handles things like loading and saving to disk, storage
+     * of data in memory, and playback
+     */
     class Song
     {
-        private List<Pattern> patterns;
-        private string songname;
-        private string authorname;
-        private List<ushort> orders;
-        private ushort flags;
-        private Version createdVersion;
-        private Version compatibleVersion;
-        private byte globalVol;
-        private byte mixVol;
-        private byte speed;
-        private byte tempo;
-        private byte[] chanVol;
-        private byte[] chanPan;
+        private List<Pattern> patterns; //!< The unordered list of patterns that are used in the project.
+        private string songname; //!< The 30 character name of the song.
+        private string authorname; //!< The 30 character name of the musician.
+        private List<ushort> orders; //!< The ordered list of which pattern happens when. Patterns may appear more than once, allowing repetition.
+        private Version createdVersion; //!< The version of Basic Tracker that the loaded song was created in.
+        private Version compatibleVersion; //!< The lowest version of Basic Tracker this song will run in. Usually the same as the created version.
+        private byte globalVol; //!< The global volume, from 00 to 7f.
+        private byte speed; //!< The speed of the song. It's how many ticks are run for each row of the song. Larger values increase accuracy in a way but slow the song down.
+        private byte tempo; //!< The tempo of the song in BPM. The row speed is therefore tempo*4
+        private byte[] chanVol; //!< The initial value of all the channel's volumes
+        private byte[] chanPan; //!< The initial value of all the channel's pans
 
+        //! Empty contructor
+        /*! Creates a new song that is empty. This is always called at program boot.
+         */
         public Song()
         {
             patterns = new List<Pattern>();
             songname = "                              ";
             authorname = "                              ";
             orders = new List<ushort>();
-            flags = 9;
             createdVersion = typeof(Program).Assembly.GetName().Version;
             compatibleVersion = createdVersion;
             globalVol = 0x7F;
-            mixVol = 0x7F;
             speed = 0x10;
             tempo = 0x10;
             chanVol = new byte[] { 0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f };
-            chanPan = new byte[] { 0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f };
+            chanPan = new byte[] { 0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40 };
         }
 
+        //! Loads a song from a BSCM file
+        /*! Takes a reader and sets itself to the state of the song stored in the file.
+         * The file does not contain anything which is not settable by the user, like the global
+         * volume. This can be set using a volume command in the pattern.
+         * 
+         * @param[in] br A binary stream which is the file to read from.
+         */
         public void loadfromfile(BinaryReader br)
         {
             if (br.ReadChars(4) != G.signature)
@@ -224,20 +233,10 @@ namespace BasicTracker
             compatibleVersion = new Version(
                 tempver & 0x0F00 >> 12,
                 tempver & 0x00FF);
-            flags = br.ReadUInt16();
-            br.ReadUInt16(); //reserved bytes
-            globalVol = br.ReadByte();
-            mixVol = br.ReadByte();
+            br.ReadChars(6); //reserved bytes
+            globalVol = 0;
             speed = br.ReadByte();
             tempo = br.ReadByte();
-            for (int i = 0; i < 8; i++)
-            {
-                chanPan[i] = br.ReadByte();
-            }
-            for (int i = 0; i < 8; i++)
-            {
-                chanVol[i] = br.ReadByte();
-            }
             for (int i = 0; i < orders.Capacity; i++)
             {
                 orders[i] = br.ReadUInt16();
@@ -255,6 +254,14 @@ namespace BasicTracker
             }
         }
 
+        //! Loads a pattern
+        /*! Loads a pattern from the file slice.
+         * 
+         * @param patlen The length of the pattern in bytes
+         * @param rowlen The number of rows
+         * 
+         * @return The decoded pattern
+         */
         private Pattern decodePattern(ushort patlen, ushort rowlen, byte[] data)
         {
             Pattern pattern = new Pattern();
@@ -329,9 +336,13 @@ namespace BasicTracker
             return pattern;
         }
     }
+    //! A single pattern
+    /*! Stores only channel data really
+     */
     class Pattern
     {
         public Channel[] channels = new Channel[G.channels];
+        //! inits channels
         public Pattern()
         {
             for (int i = 0; i < G.channels; i++)
@@ -340,31 +351,38 @@ namespace BasicTracker
             }
         }
     }
+    //! Contains notes
     class Channel
     {
         public Note[] notes = new Note[G.depth];
     }
+    //! A single note.
+    /*! The grid is made of these. Stores the value,
+     * instrument, volume, effect and effect parameter.
+     */
     class Note
     {
+        //! The note value
         public enum N
         {
-            C_,
-            Db,
-            D_,
-            Eb,
-            E_,
-            F_,
-            Gb,
-            G_,
-            Ab,
-            A_,
-            Bb,
-            B_,
+            C_, //!< C
+            Db, //!< D flat
+            D_, //!< D
+            Eb, //!< E flat
+            E_, //!< E
+            F_, //!< F
+            Gb, //!< G flat
+            G_, //!< G
+            Ab, //!< A flat
+            A_, //!< A
+            Bb, //!< B flat
+            B_, //!< B
             END = 254,  //!< end note, stop channel (===)
             EMPTY = 255 //!< undefined, yet to be input (-_-)
         }
         public N note { get; private set; }
         public int octave { get; private set; }
+        //! Set the internal note to the note and octave for later retrieval.
         public byte internal_note
         {
             set {
@@ -374,74 +392,82 @@ namespace BasicTracker
             }
             private get { return internal_note; }
         }
-        public byte instrument;
+        public byte instrument; //!< The instrument
         public volumeParameter volume;
         public effectParameter effect;
-
+        //! part of the file loading. Decodes what effect is in the volume column because of course.
+        /*! Removed most of this code to simplify the tracker. It's a shame but I simply
+         * can't implement all of this in the time allotted.
+         */
         public volumeParameter decodeVolume(byte vol)
         {
             volumeParameter param = new volumeParameter();
-            if (vol <= 64)
-            {
-                param.type = volumeParameter.Type.V;
-                param.value = vol;
-            }
-            else if (vol <= 74)
-            {
-                param.type = volumeParameter.Type.A;
-                param.value = (byte)(vol - 64);
-            }
-            else if (vol <= 84)
-            {
-                param.type = volumeParameter.Type.B;
-                param.value = (byte)(vol - 74);
-            }
-            else if (vol <= 94)
-            {
-                param.type = volumeParameter.Type.C;
-                param.value = (byte)(vol - 84);
-            }
-            else if (vol <= 104)
-            {
-                param.type = volumeParameter.Type.D;
-                param.value = (byte)(vol - 94);
-            }
-            else if (vol <= 114)
-            {
-                param.type = volumeParameter.Type.E;
-                param.value = (byte)(vol - 104);
-            }
-            else if (vol <= 124)
-            {
-                param.type = volumeParameter.Type.F;
-                param.value = (byte)(vol - 114);
-            }
-            else if (vol <= 127)
-            {
-                throw new Exception("Unknown volume value");
-            }
-            else if (vol <= 192)
-            {
-                param.type = volumeParameter.Type.P;
-                param.value = (byte)(vol - 128);
-            }
-            else if (vol <= 202)
-            {
-                param.type = volumeParameter.Type.H;
-                param.value = (byte)(vol - 192);
-            }
-            else if (vol <= 212)
-            {
-                param.type = volumeParameter.Type.V;
-                param.value = (byte)(vol - 202);
-            }
-            else
-            {
-                throw new Exception("Unknown volume value");
-            }
+            //if (vol <= 64)
+            //{
+            //    param.type = volumeParameter.Type.V;
+            //    param.value = vol;
+            //}
+            //else if (vol <= 74)
+            //{
+            //    param.type = volumeParameter.Type.A;
+            //    param.value = (byte)(vol - 64);
+            //}
+            //else if (vol <= 84)
+            //{
+            //    param.type = volumeParameter.Type.B;
+            //    param.value = (byte)(vol - 74);
+            //}
+            //else if (vol <= 94)
+            //{
+            //    param.type = volumeParameter.Type.C;
+            //    param.value = (byte)(vol - 84);
+            //}
+            //else if (vol <= 104)
+            //{
+            //    param.type = volumeParameter.Type.D;
+            //    param.value = (byte)(vol - 94);
+            //}
+            //else if (vol <= 114)
+            //{
+            //    param.type = volumeParameter.Type.E;
+            //    param.value = (byte)(vol - 104);
+            //}
+            //else if (vol <= 124)
+            //{
+            //    param.type = volumeParameter.Type.F;
+            //    param.value = (byte)(vol - 114);
+            //}
+            //else if (vol <= 127)
+            //{
+            //    throw new Exception("Unknown volume value");
+            //}
+            //else if (vol <= 192)
+            //{
+            //    param.type = volumeParameter.Type.P;
+            //    param.value = (byte)(vol - 128);
+            //}
+            //else if (vol <= 202)
+            //{
+            //    param.type = volumeParameter.Type.H;
+            //    param.value = (byte)(vol - 192);
+            //}
+            //else if (vol <= 212)
+            //{
+            //    param.type = volumeParameter.Type.V;
+            //    param.value = (byte)(vol - 202);
+            //}
+            //else
+            //{
+            //    throw new Exception("Unknown volume value");
+            //}
+            param.value = vol;
+            param.type = volumeParameter.Type.V;
             return param;
         }
     }
+    //! a data type to hold the Volume parameter
+    /* holds the value and type - but type is always "V" so that's nice
+     */
     struct volumeParameter
     {
         public enum Type
@@ -460,6 +486,9 @@ namespace BasicTracker
         public Type type;
         public byte value;
     }
+    //! a data type to hold the Effect parameter
+    /* holds the value and type.
+     */
     struct effectParameter
     {
         public enum Type

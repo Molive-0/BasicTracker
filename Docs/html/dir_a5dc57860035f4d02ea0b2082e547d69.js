@@ -5,7 +5,7 @@ var dir_a5dc57860035f4d02ea0b2082e547d69 =
     [ "AudioSubsystem.cs", "_audio_subsystem_8cs.html", [
       [ "AudioSubsystem", "class_basic_tracker_1_1_audio_subsystem.html", "class_basic_tracker_1_1_audio_subsystem" ]
     ] ],
-    [ "Class1.cs", "_class1_8cs.html", [
+    [ "MainWindow.cs", "_main_window_8cs.html", [
       [ "MainWindow", "class_basic_tracker_1_1_main_window.html", "class_basic_tracker_1_1_main_window" ]
     ] ],
     [ "Program.cs", "_program_8cs.html", [
