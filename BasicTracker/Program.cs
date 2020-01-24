@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows;
+using System.IO;
+using Microsoft.Win32.SafeHandles;
+using System.Threading;
 
 [assembly: AssemblyVersion("0.1.*")] //define the auto incrementing build version
+
 
 //! The main namespace for Basic Tracker. All code should be in this namespace.
 namespace BasicTracker
@@ -17,12 +22,13 @@ namespace BasicTracker
     //! Global constants
     /*! 
      * The G class includes a pile of constants and readonly values
-     * which can be accessed from anywhere in the document. It allows for
-     * easy editing of constants for the entire document.
+     * which can be accessed from anywhere in the project. It allows for
+     * easy editing of constants.
      */
-    public static class G 
+    public static class G
     {
-        public const int Vmove = 1; //!< Lines that are moved when the up or down arrows are pressed whilst holding CTRL
+        public const int Vmove = 4; //!< Lines that are moved when the up or down arrows are pressed whilst holding ALT
+        public const int VmoveLarge = 8; //!< Lines that are moved when the up or down arrows are pressed whilst holding CTRL ALT
         public const string defaultBar = "|-_- -- --- ---"; //!< The starting value for each note
         public const int Hmove = 15; //!<  Lines that are moved when the left or right arrows are pressed whilst holding CTRL. Is defaultBar.Length
         public const int depth = 32; //!< How many rows are in a pattern
@@ -30,18 +36,90 @@ namespace BasicTracker
         public const int width = 15 * 8; //!< defaultBar.Length * channels, the columns needed for the screen
         public static readonly char[] signature = { 'B', 'S', 'C', 'M' }; //!< The four characters at the very start of the file format. Used for file recognition, so that you can quickly see if a file is a Basic Tracker file.
         //! A ridiculous string which contains the starting state of the header for the GUI. It's really long because it if it reaches the end of a line it automatically goes to the next line and so I can't put a new line there. So it's just a really long line. It's a mess really, don't look at it.
-        public const string header =  
-@"  +---------------+---------------+------------------------------+   +-----------------+---------------+    
-  | BASIC TRACKER | Version: 0.01 | Made by John ""Molive"" Hunter |   | EDITING PATTERN | 00001 / 00002 |   PRESS F1 FOR HELP
-  +---------------+---------------+------------------------------+   +-----------------+---------------+    
-  Song: ______________________________ Author: ______________________________ Octave: 4 Tempo: 00 Speed: 00  Length: 00m 00s
-+----------------------------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+| ORDERING (scroll at 00000) | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 | 1 | 2 |...|+----------------------------+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+¦ All Right!                                                                                                                 ¦";
+        public const string header =
+            "  +---------------+---------------+------------------------------+   +-----------------+---------------+                      " +
+            "  | BASIC TRACKER | Version: {0:D1}.{1:D2} | Made by John \"Molive\" Hunter |   | EDITING PATTERN | {2:D5} / {3:D5} |   PRESS F1 FOR HELP  " +
+            "  +---------------+---------------+------------------------------+   +-----------------+---------------+                      " +
+            "  Song: {4} Author: {5} Octave: {6:D1} Tempo: {7:X2} Speed: {8:X2}  Instrument: {9:X2}   ";
         public static readonly Version version = typeof(Program).Assembly.GetName().Version; //!< Gets the autoincrementing version of the app. Used in checking the file formats.
-        public const int MF_BYCOMMAND = 0x00000000; //!< Command for something, can't remember.
-        public const int SC_CLOSE = 0xF060; //!< Code to remove the ability to close the app >:)
+        public const string helpString =
+            "Hello, and welcome to Basic Tracker, a music tracker program I have created for my A-Level.\n" +
+            "Trackers are known for being able to render on a text only display - to this end, Basic Tracker\n" +
+            "Is rendered only using the default C# console (There are a few parts in Windows Forms, due to\n" +
+            "time constraints). This is meant to be a simplish implementation of a tracker program based on\n" +
+            " the hardware of the Super Nintendo Entertainment System and the effects of Impulse Tracker.\n" +
+            "As opposed to most trackers, the cursor moves over the pattern rather than the pattern moving\n" +
+            "under the cursor.\n" +
+            "This is not a tutorial on how to use a tracker, and so this help window will assume you know\n" +
+            "how to use one already. For this tracker, all patterns are 32 lines long. The tempo is in BPM\n" +
+            "and the speed is how many ticks happen per row. There are 5 preset instruments to choose from,\n" +
+            "from 1-5: a sine wave, a square wave, a triangle wave, a sawtooth wave, and white noise. Instruments\n" +
+            "6-A are LFO versions of instruments 1-5.\n" +
+            "To move the cursor around the screen, use the arrow keys. Holding CTRL while moving allows you to\n" +
+            "move whole columns at a time.\n" +
+            "To start playback, press space. To stop, press space again. Pressing the enter key move the playback\n" +
+            "cursor to the position of the edit cursor, and plays that row by itself. To stop the sound system\n" +
+            "outputting sound press Tab.\n" +
+            "If you are on a pattern where the playback cursor is not, and you press space to start playback you\n" +
+            "will be moved to the pattern where the cursor is. If you wanted to play that pattern pressing enter\n" +
+            "first will try to move the cursor to you, and failing that move you to the cursor. The playback head\n" +
+            "cannot reach patterns that are not in the ordering list.\n" +
+            "The columns for each channel feature (from left to right) note + octave (red), instrument (blue),\n" +
+            "volume (green) and effect (yellow).\n" +
+            "The tracker can play any note from C_0 to B_8. This is inputted ProTracker style with the keyboard\n" +
+            "mapped like a piano, with the first octave at Z to M and a second, higher octave at Q to U,\n" +
+            "up to P as a third above the second octave. If you want to change octave simply use the numerical\n" +
+            "keypad to get to a new one. If you don't have a keypad \";\" and \"'\" increment and decrement it.\n" +
+            "Instrument is auto inserted for every note inserted. It is stored in hexadecimal and can be\n" +
+            "over-written by simply selecting it using the cursor and pressing the desired hex digit on\n" +
+            "the keyboard. Instrument zero is silence. The instrument that is inserted when a note is input\n" +
+            "can be seen on the header bar, and changed with \"[\" and \"]\".\n" +
+            "The volume was meant to have more purpose, but has since been delegated to only setting the\n" +
+            "volume. To set the volume on a note, move the cursor to the left most green character and\n" +
+            "press \"V\". The volume is stored in hexadecimal like the instrument; to set it move the cursor\n" +
+            "to the hex digit you want to edit and press the desired new hex digit. To remove a volume set\n" +
+            "press backspace on any of the green characters that makes it up.\n" +
+            "The effect performs many different functions. The effects available are the same as that in\n" +
+            "Impulse Tracker, except that Oxx has been replaced with OpenMPT's parameter extension. They\n" +
+            "are set in the same way that the volume is set, the effect letter at the front and the\n" +
+            "parameter in hexadecimal afterwards. Backspace deletes the effect.\n" +
+            "To create more patterns make sure the cursor is in the pattern area and press \"CTRL-N\".\n" +
+            "This creates a pattern and the end of the pattern list. If you have more than one pattern\n" +
+            "you can view the others by pressing \"CTRL+[\" and \"CTRL+]\". A pattern can not be played\n" +
+            "unless it exists somewhere within the ordering list. If you wish to delete a pattern, press\n" +
+            "\"CTRL-Backspace\".\n" +
+            "The ordering list is the order at which the playback cursor moves between patterns, a pattern\n" +
+            "may appear more than once in the ordering list. To change to editing the ordering list instead\n" +
+            "of the pattern, press F6. Pressing F6 again moves the cursor back.\n" +
+            "Whilst editing the ordering list pressing left and right moves you forward and backward through\n" +
+            "the list. Pressing Enter on any entry allows you to set it to a pattern number between 1 and\n" +
+            "65535. If you want to add another item to the list pressing \"CTRL-N\" inserts one at the\n" +
+            "current position.\n" +
+            "If you wish to remove an item pressing backspace removes it from the list. If you wish to\n" +
+            "remove the pattern as well (as long as it appears nowhere else) pressing \"CTRL-Backspace\"\n" +
+            "removes both.\n" +
+            "Whilst on the pattern area, pressing F1 brings up this help menu. pressing F2 allows you to\n" +
+            "change the title of the song (max 30 characters), pressing F3 allows you to change the author\n" +
+            "or musician of the song (max 30 characters), pressing F4 allows you to edit the tempo (first\n" +
+            "hex character then second hex character, cannot be zero) and pressing F5 allows you to edit\n" +
+            "the speed (same restrictions as tempo). I advise against high speeds as it significatly slows\n" +
+            "down the playback rate.\n" +
+            "If you wish to save your work, pressing \"CTRL-S\" opens a save dialog. Similarly pressing\n" +
+            "\"CTRL-O\" allows you to open a file you have previously saved. NOTE: opening a file will\n" +
+            "overwrite the currently opened song and any unsaved work will be lost!\n" +
+            "To exit the program at any point press ESC. Be careful to not press it accidentally.\n" +
+            "I'd appreciate feedback! You can reach me by email at moliveofscratch@gmail.com. I need\n" +
+            "people to give advice on how to make this program better for the A-Level write-up so it'd\n" +
+            "be very useful.\n" +
+            "Thanks!\n" +
+            "    ~Molive";
+        public const int MF_BYCOMMAND = 0x00000000; //!< Flags for following commands
+        public const int SC_CLOSE = 0xF060; //!< Code to remove the ability to close the app >:) Unused
         public const int SC_MINIMIZE = 0xF020; //!< Code to remove the ability to minimize the app. Unused
         public const int SC_MAXIMIZE = 0xF030; //!< Code to remove the ability to maximise the app
         public const int SC_SIZE = 0xF000; //!< Code to remove the ability to resize the app
+
+
     }
     //! Main program class
     /*! It doesn't do much.
@@ -53,16 +131,54 @@ namespace BasicTracker
          *  
          *  @param args Command line arguments
          */
+        [STAThread]
         static void Main(string[] args)
         {
-            AudioSubsystem.init(); // We call the constructor on the Audio section after we've inited other things.
-            do
+            Console.CancelKeyPress += closing;
+            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest; // Make ourselves really important and better than all your other programs which aren't as cool as this one.
+            AudioSubsystem.init(); // We call the constructor on the Audio section after we've initialised other things.
+            //Driver.test();
+            Driver.init();
+            bool exit = false;
+            while (!exit)
             {
-                Consolex.RefreshKeys();
-                Consolex.handleMovement();
-            } while (Consolex.GetKey() != ConsoleKey.Escape);
+                do
+                {
+                    Consolex.RefreshKeys();
+                    Consolex.handleMovement();
+                    Consolex.handleScreen();
+                    Application.DoEvents();
+                    Driver.ExecuteRow();
+                    Consolex.waitOnTick();
+                } while (Consolex.GetKey() != ConsoleKey.Escape);
+                DialogResult d = MessageBox.Show("Do you wish to save your work before quitting?", "Quit", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (d == DialogResult.Yes)
+                {
+                    DialogResult x = Consolex.SaveSong();
+                    exit = x == DialogResult.OK;
+                }
+                else if (d == DialogResult.No) { exit = true; }
+            }
+            AudioSubsystem.Shutdown();
+            Console.Clear();
+        }
+        static void closing(object sender, ConsoleCancelEventArgs e)
+        {
+            DialogResult d = MessageBox.Show("Do you wish to save your work before quitting?", "Quit", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+            if (d == DialogResult.Yes)
+            {
+                DialogResult x = Consolex.SaveSong();
+                e.Cancel = x != DialogResult.OK;
+            }
+            else if (d == DialogResult.Cancel) { e.Cancel = true; }
+            if (!e.Cancel)
+            {
+                AudioSubsystem.Shutdown();
+                Console.Clear();
+            }
         }
     }
+
     //! Gui handling code and rudimentary API
     /*! It helps the MainWindow create the GUI for the program.
      * It might not be totally needed but it helps organise the code.
@@ -71,13 +187,24 @@ namespace BasicTracker
      * windows, like clipping and spawning and such. As there is only one
      * window this is redundant to an extent.
      */
-    static class Consolex  
+    static class Consolex
     {
         public static bool control { get; private set; } //!< Cached bool for if the Control key is pressed. The setter is private.
         public static bool shift { get; private set; } //!< Cached bool for if the Shift key is pressed. The setter is private.
         public static bool alt { get; private set; } //!< Cached bool for if the Alt key is pressed. The setter is private.
         private static ConsoleKey? lastkey; //!< Cached value for last key pressed. It's private, but there's a public GetKey that returns it.
-        
+
+        private static int octave;
+        private static int currentPattern;
+        private static int instrument;
+        private static int orderPosition;
+        private static int currentRow;
+        private static string screenMessage;
+        private static Stopwatch screenTime = new Stopwatch();
+        private static Stopwatch frameTimer = new Stopwatch();
+
+        private static bool helpOpen = false;
+
         //! Empty static console constructor
         /*! init run automatically before anything else.
          * Contains code to set up the screen for the first time, such as resising
@@ -86,10 +213,11 @@ namespace BasicTracker
          */
         static Consolex()
         {
+            Console.Clear();
             //Console.CursorVisible = false;
-            Console.BufferHeight = 42;
-            Console.BufferWidth = 126;
-            for (int i = 0; i < G.depth; i++)
+
+            //Console.Write(Console.ReadKey().Key);
+            /*for (int i = 0; i < G.depth; i++)
             {
                 Console.SetCursorPosition(2, 9 + i);
                 for (int j = 0; j < 8; j++)
@@ -97,17 +225,22 @@ namespace BasicTracker
                     Console.Write(G.defaultBar);
                 }
                 Console.Write("|");
-            }
-            Console.SetCursorPosition(0, 0);
+            }*/
+            //Console.SetCursorPosition(0, 0);
             Console.SetWindowSize(126, 42);
+            Console.BufferHeight = 42;
+            Console.BufferWidth = 126;
             Console.SetWindowPosition(0, 0);
-            Console.Write(G.header);
+            Console.CursorSize = 100;
+
+            /*Console.Write(G.header);
 
             Console.SetCursorPosition(29, 1);
             Console.Write("{0}.{1}", G.version.Major.ToString("0"), G.version.Minor.ToString("00"));
-
-            Console.SetCursorPosition(3, 9);
-            Console.TreatControlCAsInput = true;
+            */
+            Console.SetCursorPosition(4, 10);
+            Console.Title = "Basic Tracker :)";
+            //Console.TreatControlCAsInput = true;
 
             IntPtr handle = GetConsoleWindow();
             IntPtr sysMenu = GetSystemMenu(handle, false);
@@ -118,8 +251,43 @@ namespace BasicTracker
                 DeleteMenu(sysMenu, G.SC_MAXIMIZE, G.MF_BYCOMMAND);
                 DeleteMenu(sysMenu, G.SC_SIZE, G.MF_BYCOMMAND);
             }
+
+            octave = 4;
+            currentPattern = 1;
+            instrument = 1;
+            screenMessage = "All Right!";
+            RefreshScreen();
+        }
+        public static char ToAscii(Keys key, Keys modifiers)
+        {
+            var outputBuilder = new StringBuilder(2);
+            int result = ToAscii((uint)key, 0, GetKeyState(modifiers),
+                                 outputBuilder, 0);
+            if (result == 1)
+                return outputBuilder[0];
+            else
+                return ' ';
         }
 
+        private const byte HighBit = 0x80;
+        private static byte[] GetKeyState(Keys modifiers)
+        {
+            var keyState = new byte[256];
+            foreach (Keys key in Enum.GetValues(typeof(Keys)))
+            {
+                if ((modifiers & key) == key)
+                {
+                    keyState[(int)key] = HighBit;
+                }
+            }
+            return keyState;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int ToAscii(uint uVirtKey, uint uScanCode,
+                                          byte[] lpKeyState,
+                                          [Out] StringBuilder lpChar,
+                                          uint uFlags);
         //! For removing abilities
         [DllImport("user32.dll")]
         public static extern int DeleteMenu(IntPtr hMenu, int nPosition, int wFlags);
@@ -137,7 +305,907 @@ namespace BasicTracker
          */
         public static void handleMovement()
         {
-            MainWindow.HandleMovement();
+            ConsoleKey? keyornull = Consolex.GetKey();
+            if (keyornull.HasValue)
+            {
+                ConsoleKey key = keyornull.Value;
+                if (key == ConsoleKey.Delete) key = ConsoleKey.Backspace;
+                char oemFixer = ToAscii((Keys)key, Keys.None); //Ha, haha, haaaa... fixes a problem with keyboard manufacturers being awful.
+                if (Console.CursorTop == 5)
+                {
+                    // We're in the ordering, oh no
+                    if (key == ConsoleKey.RightArrow)
+                    {
+                        if (control)
+                        {
+                            if (orderPosition >= Driver.orders.Count() - 10)
+                            {
+                                orderPosition = Driver.orders.Count() - 1;
+                                SetMessage("Cannot go further right along the ordering list");
+                            }
+                            else
+                            {
+                                orderPosition += 10;
+                                RefreshScreen();
+                            }
+                        }
+                        else
+                        {
+                            if (orderPosition == Driver.orders.Count() - 1)
+                            {
+                                SetMessage("Cannot go further right along the ordering list");
+                            }
+                            else
+                            {
+                                orderPosition++;
+                                RefreshScreen();
+                            }
+                        }
+                    }
+                    if (key == ConsoleKey.LeftArrow)
+                    {
+                        if (control)
+                        {
+                            if (orderPosition <= 9)
+                            {
+                                orderPosition = 0;
+                                SetMessage("Cannot go further left along the ordering list");
+                            }
+                            else
+                            {
+                                orderPosition -= 10;
+                                RefreshScreen();
+                            }
+                        }
+                        else
+                        {
+                            if (orderPosition == 0)
+                            {
+                                SetMessage("Cannot go further left along the ordering list");
+                            }
+                            else
+                            {
+                                orderPosition--;
+                                RefreshScreen();
+                            }
+                        }
+                    }
+                    if (key == ConsoleKey.Backspace)
+                    {
+                        if (Driver.orders.Count() == 1)
+                        {
+                            SetMessage("Cannot delete the last order");
+                        }
+                        else if (Driver.playbackStarted && currentPattern == Driver.GetPatternCount())
+                        {
+                            SetMessage("Cannot delete the last order whilst the driver is playing it. Stop the playback first.");
+                        }
+                        else
+                        {
+                            if (control)
+                            {
+                                if (Driver.orders.Where(x => x == Driver.orders[orderPosition]).Count() > 1)
+                                {
+                                    SetMessage("Cannot delete pattern that is referenced in the ordering more than once.");
+                                }
+                                else
+                                {
+                                    DialogResult d = MessageBox.Show("Are you SURE you want to delete BOTH this order and the related pattern?", "Delete order and pattern",
+                                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                    if (d == DialogResult.OK)
+                                    {
+                                        Driver.RemovePattern(Driver.orders[orderPosition]);
+                                        Driver.orders.RemoveAt(orderPosition);
+                                        if (orderPosition >= Driver.orders.Count()) orderPosition--;
+                                        if (currentPattern > Driver.GetPatternCount()) currentPattern--;
+                                        RefreshScreen();
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Driver.orders.RemoveAt(orderPosition);
+                                if (orderPosition >= Driver.orders.Count()) orderPosition--;
+                                RefreshScreen();
+                            }
+                        }
+                    }
+                    if (key == ConsoleKey.F6)
+                    {
+                        Console.SetCursorPosition(4, 10);
+                    }
+                    if (key == ConsoleKey.N && control)
+                    {
+                        Driver.orders.Insert(orderPosition, 1);
+                        RefreshScreen();
+                    }
+                    if (key == ConsoleKey.Enter)
+                    {
+                        int posx = Console.CursorLeft;
+                        int posy = Console.CursorTop;
+                        ushort temp = Driver.orders[orderPosition];
+                        Driver.orders[orderPosition] = 10000;
+                        SetMessage("Changing order at index " + orderPosition.ToString());
+                        string input = Console.ReadLine();
+                        if (ushort.TryParse(input, out ushort tryvalue))
+                        {
+                            if (tryvalue > Driver.GetPatternCount())
+                            {
+                                Driver.orders[orderPosition] = temp;
+                                SetMessage("Pattern " + tryvalue + " does not exist.");
+                            }
+                            else
+                            {
+                                Driver.orders[orderPosition] = tryvalue;
+                                SetMessage("Success");
+                            }
+                        }
+                        else
+                        {
+                            Driver.orders[orderPosition] = temp;
+                            SetMessage(input + " is not a number between 0 and 65535");
+                        }
+                        Console.SetCursorPosition(posx, posy);
+                    }
+                    if (key == ConsoleKey.Spacebar)
+                    {
+                        Driver.TogglePlayback();
+                    }
+                    if (key == ConsoleKey.Tab)
+                    {
+                        for (int i = 0; i < 8; i++)
+                        {
+                            AudioSubsystem.Stop(i);
+                        }
+                    }
+                }
+                else
+                {
+                    if (key == ConsoleKey.UpArrow && Console.CursorTop >= 11)
+                    {
+                        if (Consolex.control && alt && Console.CursorTop >= G.VmoveLarge + 10)
+                        {
+                            Console.CursorTop -= G.VmoveLarge;
+                        }
+                        else
+                        if (Consolex.alt && Console.CursorTop >= G.Vmove + 10)
+                        {
+                            Console.CursorTop -= G.Vmove;
+                        }
+                        else
+                            Console.CursorTop -= 1;
+                    }
+                    else if (key == ConsoleKey.DownArrow && Console.CursorTop <= G.depth + 8)
+                    {
+                        if (Consolex.control && alt && Console.CursorTop >= G.depth - G.VmoveLarge + 9)
+                        {
+                            Console.CursorTop += G.VmoveLarge;
+                        }
+                        else
+                        if (Consolex.alt && Console.CursorTop <= G.depth - G.Vmove + 9)
+                        {
+                            Console.CursorTop += G.Vmove;
+                        }
+                        else
+                            Console.CursorTop += 1;
+                    }
+                    else if (key == ConsoleKey.LeftArrow && Console.CursorLeft > 4)
+                    {
+                        if (Consolex.control && Console.CursorLeft >= G.Hmove)
+                        {
+                            Console.CursorLeft -= G.Hmove;
+                        }
+                        else { Console.CursorLeft -= 1; }
+                        if (G.defaultBar[(Console.CursorLeft - 3) % G.defaultBar.Length] != '-')
+                        {
+                            Console.CursorLeft -= 1;
+                        }
+                    }
+                    else if (key == ConsoleKey.RightArrow && Console.CursorLeft <= G.width + 1)
+                    {
+                        if (Consolex.control && Console.CursorLeft <= G.width - G.Hmove)
+                        {
+                            Console.CursorLeft += G.Hmove;
+                        }
+                        else { Console.CursorLeft += 1; }
+                        if (G.defaultBar[(Console.CursorLeft - 3) % G.defaultBar.Length] != '-')
+                        {
+                            Console.CursorLeft += 1;
+                        }
+                    }
+                    else if (key == ConsoleKey.LeftArrow || key == ConsoleKey.RightArrow || key == ConsoleKey.UpArrow || key == ConsoleKey.DownArrow)
+                    {
+                        Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop);
+                    }
+                    if (!(control || shift || alt))
+                    {
+                        ProcessKey(key);
+
+                        if (Console.CursorLeft == G.width + 3)
+                        {
+                            Console.CursorLeft -= 1;
+                        }
+                        if (Console.CursorTop >= 42)
+                        {
+                            Console.CursorTop -= 1;
+                        }
+                        if (G.defaultBar[(Console.CursorLeft - 3) % G.defaultBar.Length] != '-')
+                        {
+                            Console.CursorLeft += 1;
+                        }
+
+                        if (oemFixer == ';') // ;
+                        {
+                            octave--;
+                            if (octave < 0) octave = 0;
+                            RefreshScreen();
+                        }
+                        if (oemFixer == '\'') // ' (~?)
+                        {
+                            octave++;
+                            if (octave > 8) octave = 8;
+                            RefreshScreen();
+                        }
+                        if (oemFixer == '[') // [
+                        {
+                            instrument--;
+                            if (instrument < 0) instrument = 0;
+                            RefreshScreen();
+                        }
+                        if (oemFixer == ']') //  ]
+                        {
+                            instrument++;
+                            if (instrument > 10) instrument = 10;
+                            RefreshScreen();
+                        }
+                        ConsoleKey[] numkeys =
+                        {
+                    ConsoleKey.NumPad0,
+                    ConsoleKey.NumPad1,
+                    ConsoleKey.NumPad2,
+                    ConsoleKey.NumPad3,
+                    ConsoleKey.NumPad4,
+                    ConsoleKey.NumPad5,
+                    ConsoleKey.NumPad6,
+                    ConsoleKey.NumPad7,
+                    ConsoleKey.NumPad8,
+                    };
+                        if (numkeys.Contains(key))
+                        {
+                            octave = Array.IndexOf(numkeys, key);
+                            RefreshScreen();
+                        }
+                        if (key == ConsoleKey.F3)
+                        {
+                            if (Driver.playbackStarted == false)
+                            {
+                                SetMessage("Editing the author...");
+                                int x = Console.CursorLeft;
+                                int y = Console.CursorTop;
+                                Console.SetCursorPosition(47, 3);
+                                string au = Console.ReadLine();
+                                //Console.WriteLine(au);
+                                //Console.ReadLine();
+                                if (au.Length > 30) au = au.Substring(0, 30);
+                                Driver.Author = au;
+                                Console.CursorLeft = x;
+                                Console.CursorTop = y;
+                                RefreshScreen();
+                            }
+                            else
+                            {
+                                SetMessage("Cannot edit author whilst song is playing.");
+                            }
+                        }
+                        if (key == ConsoleKey.F2)
+                        {
+                            if (Driver.playbackStarted == false)
+                            {
+                                SetMessage("Editing the title...");
+                                int x = Console.CursorLeft;
+                                int y = Console.CursorTop;
+                                Console.SetCursorPosition(8, 3);
+                                string au = Console.ReadLine();
+                                //Console.WriteLine(au);
+                                //Console.ReadLine();
+                                if (au.Length > 30) au = au.Substring(0, 30);
+                                Driver.Songname = au;
+                                Console.CursorLeft = x;
+                                Console.CursorTop = y;
+                                RefreshScreen();
+                            }
+                            else
+                            {
+                                SetMessage("Cannot edit title whilst song is playing.");
+                            }
+                        }
+                        if (key == ConsoleKey.F5)
+                        {
+                            if (Driver.playbackStarted == false)
+                            {
+                                SetMessage("Editing the starting speed...");
+                                int x = Console.CursorLeft;
+                                int y = Console.CursorTop;
+                                Console.SetCursorPosition(105, 3);
+                                Driver.Speed = (byte)GetHexInput(2);
+                                if (Driver.Speed == 0) Driver.Speed++;
+                                Console.CursorLeft = x;
+                                Console.CursorTop = y;
+                                if (Driver.Speed > 30)
+                                {
+                                    SetMessage("Warning: Speed is set rather high. This might induce slowdown on most computers.");
+                                }
+                                else RefreshScreen();
+                            }
+                            else
+                            {
+                                SetMessage("Cannot edit starting speed whilst song is playing.");
+                            }
+                        }
+                        if (key == ConsoleKey.F4)
+                        {
+                            if (Driver.playbackStarted == false)
+                            {
+                                SetMessage("Editing the starting tempo...");
+                                int x = Console.CursorLeft;
+                                int y = Console.CursorTop;
+                                Console.SetCursorPosition(95, 3);
+                                Driver.Tempo = (byte)GetHexInput(2);
+                                if (Driver.Tempo == 0) Driver.Tempo++;
+                                Console.CursorLeft = x;
+                                Console.CursorTop = y;
+                                RefreshScreen();
+                            }
+                            else
+                            {
+                                SetMessage("Cannot edit starting tempo whilst song is playing.");
+                            }
+                        }
+                        if (key == ConsoleKey.Enter)
+                        {
+                            Driver.RunOneLine(Console.CursorTop - 10, (ushort)currentPattern);
+                            currentRow = Console.CursorTop - 10;
+                            Consolex.RefreshScreen();
+                        }
+                        if (key == ConsoleKey.Spacebar)
+                        {
+                            Driver.TogglePlayback();
+                        }
+                        if (key == ConsoleKey.Tab)
+                        {
+                            for (int i = 0; i < 8; i++)
+                            {
+                                AudioSubsystem.Stop(i);
+                            }
+                        }
+                        if (key == ConsoleKey.F6)
+                        {
+                            Console.SetCursorPosition(31, 5);
+                        }
+                    }
+                    if (control && key == ConsoleKey.N) //Ctrl+N
+                    {
+                        if (Driver.GetPatternCount() == 65536)
+                        {
+                            SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
+                        }
+                        else
+                        {
+                            Driver.NewPattern();
+                            SetMessage("Created a new pattern");
+                        }
+                    }
+                    if (control && key == ConsoleKey.D) //Ctrl+D
+                    {
+                        if (Driver.GetPatternCount() == 65536)
+                        {
+                            SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
+                        }
+                        else
+                        {
+                            int finalPattern = Driver.CopyPattern(currentPattern);
+                            SetMessage("Copied pattern " + currentPattern.ToString() + " to pattern " + finalPattern);
+                        }
+                    }
+                    if (control && key == ConsoleKey.Z) //Ctrl+Z
+                    {
+                        Driver.CopyChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                        SetMessage("Copied channel to clipboard");
+                    }
+                    if (control && key == ConsoleKey.X)  //Ctrl+X
+                    {
+                        Driver.PasteChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                        SetMessage("Pasted channel from clipboard");
+                    }
+                    if (shift && key == ConsoleKey.Z)  //Shift+Z
+                    {
+                        Driver.RotateChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                        SetMessage("Rotated channel");
+                    }
+                    if (control && (oemFixer == '[' | oemFixer == ']'))
+                    {
+                        if (Driver.playbackStarted)
+                        {
+                            SetMessage("Cannot change pattern whilst playback is started");
+                        }
+                        else
+                        {
+                            if (oemFixer == '[') //Ctrl+[
+                            {
+                                currentPattern--;
+                            }
+                            if (oemFixer == ']') //Ctrl+]
+                            {
+                                currentPattern++;
+                            }
+                            if (currentPattern == 0)
+                            {
+                                currentPattern++;
+                                SetMessage("Cannot go lower than pattern zero");
+                            }
+                            else if (currentPattern > Driver.GetPatternCount())
+                            {
+                                currentPattern--;
+                                SetMessage("Pattern " + (currentPattern + 1).ToString() + " does not exist");
+                            }
+                            else
+                            {
+                                SetMessage("Pattern changed to pattern " + currentPattern.ToString());
+                            }
+                            Driver.AskForRow(currentPattern);
+                        }
+                    }
+                    if (key == ConsoleKey.Backspace && control)
+                    {
+                        if (Driver.GetPatternCount() == 1)
+                        {
+                            SetMessage("Cannot delete the last pattern");
+                        }
+                        else if (Driver.playbackStarted)
+                        {
+                            SetMessage("Cannot delete a pattern whilst the driver is playing it. Stop the playback first.");
+                        }
+                        else
+                        {
+                            if (Driver.orders.Where(x => x == currentPattern).Count() > 0)
+                            {
+                                SetMessage("Cannot delete pattern that is referenced in the ordering.");
+                            }
+                            else
+                            {
+                                DialogResult d = MessageBox.Show("Are you SURE you want to delete this pattern?", "Delete pattern",
+                                    MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                if (d == DialogResult.OK)
+                                {
+                                    Driver.RemovePattern(currentPattern);
+                                    if (currentPattern > Driver.GetPatternCount()) currentPattern--;
+                                    RefreshScreen();
+                                }
+                            }
+                        }
+                        //Console.WriteLine("Key is " + key);
+                    }
+                    if (key == ConsoleKey.O && control)
+                    {
+                        if (Driver.playbackStarted)
+                        {
+                            SetMessage("Cannot open song while playback is started. Stop playing the song first.");
+                        }
+                        else
+                        {
+                            OpenFileDialog f = new OpenFileDialog();
+                            f.Filter = "Basic Tracker Files (*.bsctrk) | *.bsctrk";
+                            f.Title = "Open a Basic Tracker song";
+                            f.AddExtension = true;
+                            f.CheckFileExists = true;
+                            f.CheckPathExists = true;
+                            f.DereferenceLinks = true;
+                            DialogResult d = f.ShowDialog();
+                            if (d == DialogResult.OK)
+                            {
+                                currentPattern = 1;
+                                currentRow = 0;
+                                orderPosition = 0;
+                                Driver.LoadFile(f.OpenFile());
+                                RefreshScreen();
+                            }
+                        }
+                    }
+                    if (key == ConsoleKey.S && control)
+                    {
+                        SaveSong();
+                    }
+                }
+                if (key == ConsoleKey.F1)
+                {
+                    if (!helpOpen)
+                        new Thread(() =>
+                        {
+                            helpOpen = true;
+                            Thread.CurrentThread.IsBackground = true;
+                            MessageBox.Show(G.helpString, "Basic Tracker Help", MessageBoxButtons.OK, MessageBoxIcon.None);
+                            helpOpen = false;
+                        }).Start();
+                    else SetMessage("Help is already open");
+                }
+            }
+        }
+
+        public static DialogResult SaveSong()
+        {
+            SaveFileDialog f = new SaveFileDialog();
+            f.Filter = "Basic Tracker Files (*.bsctrk) | *.bsctrk";
+            f.Title = "Save a Basic Tracker song";
+            f.AddExtension = true;
+            f.CheckPathExists = true;
+            f.DereferenceLinks = true;
+            f.OverwritePrompt = true;
+            f.RestoreDirectory = true;
+            DialogResult d = f.ShowDialog();
+            if (d == DialogResult.OK)
+            {
+                Driver.SaveFile(f.OpenFile());
+            }
+            return d;
+        }
+
+        private static int GetHexInput(int letters)
+        {
+            int input = 0;
+            for (int i = letters - 1; i >= 0; i--)
+            {
+                ConsoleKey hexkey = Console.ReadKey().Key;
+                if (hex.Contains(hexkey))
+                {
+                    input += Array.IndexOf(hex, hexkey) * (int)Math.Pow(16, i);
+                }
+            }
+            return input;
+        }
+
+        public static void rowTo(int row)
+        {
+            currentRow = row;
+            RefreshScreen();
+        }
+        public static void patternTo(int pattern)
+        {
+            currentPattern = pattern;
+            RefreshScreen();
+        }
+
+        public static void SetMessage(string v)
+        {
+            screenMessage = v;
+            screenTime.Restart();
+            RefreshScreen();
+        }
+
+        private static readonly ConsoleKey[] keymap =
+            {
+                ConsoleKey.Z,
+                ConsoleKey.S,
+                ConsoleKey.X,
+                ConsoleKey.D,
+                ConsoleKey.C,
+                ConsoleKey.V,
+                ConsoleKey.G,
+                ConsoleKey.B,
+                ConsoleKey.H,
+                ConsoleKey.N,
+                ConsoleKey.J,
+                ConsoleKey.M,
+                ConsoleKey.Q,
+                ConsoleKey.D2,
+                ConsoleKey.W,
+                ConsoleKey.D3,
+                ConsoleKey.E,
+                ConsoleKey.R,
+                ConsoleKey.D5,
+                ConsoleKey.T,
+                ConsoleKey.D6,
+                ConsoleKey.Y,
+                ConsoleKey.D7,
+                ConsoleKey.U,
+                ConsoleKey.I,
+                ConsoleKey.D9,
+                ConsoleKey.O,
+                ConsoleKey.D0,
+                ConsoleKey.P,
+            };
+
+        private static readonly ConsoleKey[] numbers =
+        {
+                ConsoleKey.D0,
+                ConsoleKey.D1,
+                ConsoleKey.D2,
+                ConsoleKey.D3,
+                ConsoleKey.D4,
+                ConsoleKey.D5,
+                ConsoleKey.D6,
+                ConsoleKey.D7,
+                ConsoleKey.D8,
+                ConsoleKey.D9,
+            };
+
+        private static readonly ConsoleKey[] hex =
+        {
+                ConsoleKey.D0,
+                ConsoleKey.D1,
+                ConsoleKey.D2,
+                ConsoleKey.D3,
+                ConsoleKey.D4,
+                ConsoleKey.D5,
+                ConsoleKey.D6,
+                ConsoleKey.D7,
+                ConsoleKey.D8,
+                ConsoleKey.D9,
+                ConsoleKey.A,
+                ConsoleKey.B,
+                ConsoleKey.C,
+                ConsoleKey.D,
+                ConsoleKey.E,
+                ConsoleKey.F,
+            };
+
+        private static readonly ConsoleKey[] alpha =
+        {
+                ConsoleKey.A,
+                ConsoleKey.B,
+                ConsoleKey.C,
+                ConsoleKey.D,
+                ConsoleKey.E,
+                ConsoleKey.F,
+                ConsoleKey.G,
+                ConsoleKey.H,
+                ConsoleKey.I,
+                ConsoleKey.J,
+                ConsoleKey.K,
+                ConsoleKey.L,
+                ConsoleKey.M,
+                ConsoleKey.N,
+                ConsoleKey.O,
+                ConsoleKey.P,
+                ConsoleKey.Q,
+                ConsoleKey.R,
+                ConsoleKey.S,
+                ConsoleKey.T,
+                ConsoleKey.U,
+                ConsoleKey.V,
+                ConsoleKey.W,
+                ConsoleKey.X,
+                ConsoleKey.Y,
+                ConsoleKey.Z,
+            };
+
+        private static void ProcessKey(ConsoleKey key)
+        {
+
+            int channel = (Console.CursorLeft - 3) / G.defaultBar.Length;
+            int row = (Console.CursorTop - 10);
+            int interchannel = (Console.CursorLeft - 3) % G.defaultBar.Length;
+            bool refresh = false;
+            switch (interchannel)
+            {
+                case 1:
+                    if (keymap.Contains(key))
+                    {
+                        Driver.ChangeNoteAt(currentPattern, channel, row, (byte)(Array.IndexOf(keymap, key) + 12 * octave)); refresh = true;
+                        Driver.ChangeInstrumentAt(currentPattern, channel, row, false, (byte)instrument);
+                    }
+                    else if (key == ConsoleKey.OemPlus)
+                    {
+                        Driver.EndNoteAt(currentPattern, channel, row); refresh = true;
+                    }
+                    break;
+                case 3:
+                    if (numbers.Contains(key))
+                    {
+                        Driver.ChangeOctaveAt(currentPattern, channel, row, Array.IndexOf(numbers, key)); refresh = true;
+                    }
+                    break;
+                case 5:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeInstrumentAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+                case 6:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeInstrumentAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+                case 8:
+                    if (key == ConsoleKey.V)
+                    {
+                        Driver.SetVolumeAt(currentPattern, channel, row); refresh = true;
+                    }
+                    break;
+                case 9:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeVolumeAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+                case 10:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeVolumeAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+                case 12:
+                    if (alpha.Contains(key))
+                    {
+                        Driver.ChangeEffectTypeAt(currentPattern, channel, row, key.ToString()[0]); refresh = true;
+                    }
+                    break;
+                case 13:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeEffectParamAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+                case 14:
+                    if (hex.Contains(key))
+                    {
+                        Driver.ChangeEffectParamAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
+                    }
+                    break;
+            }
+
+            if (key == ConsoleKey.Backspace)
+            {
+                switch (interchannel)
+                {
+                    case 1:
+                    case 2:
+                    case 3:
+                        Driver.ClearNoteAt(currentPattern, channel, row);
+                        refresh = true;
+                        break;
+                    case 8:
+                    case 9:
+                    case 10:
+                        Driver.ClearVolumeAt(currentPattern, channel, row);
+                        refresh = true;
+                        break;
+                    case 12:
+                    case 13:
+                    case 14:
+                        Driver.ClearEffectAt(currentPattern, channel, row);
+                        refresh = true;
+                        break;
+                }
+            }
+            if (refresh)
+            {
+                RefreshScreen();
+                //Console.CursorTop += 1;
+            }
+        }
+
+        private static void RefreshScreen()
+        {
+            string screen = String.Format(G.header,
+                G.version.Major, G.version.Minor,
+                currentPattern,
+                Driver.GetPatternCount(),
+                Driver.Songname.PadRight(30, '_'), Driver.Author.PadRight(30, '_'),
+                octave,
+                Driver.Tempo, Driver.Speed,
+                instrument);
+
+            List<string> orders = new List<string>();
+            int len = 0;
+            int pos = orderPosition;
+            int ordersCount = Driver.orders.Count();
+            while (len < 92)
+            {
+                if (pos == ordersCount) break;
+                string order = Driver.orders[pos].ToString();
+                orders.Add(order);
+                pos++;
+                len += 3 + order.Length;
+            }
+            //if (pos != ordersCount)
+            //    orders.RemoveAt(orders.Count() - 1);
+
+            string ordersTemp = "+----------------------------+";
+            foreach (string s in orders)
+            {
+                ordersTemp += new string('-', s.Length + 2) + "+";
+            }
+            ordersTemp = ordersTemp.PadRight(125, '-') + '+';
+            screen += ordersTemp;
+
+            string ordersCenter = String.Format("| ORDERING (scroll at {0:D5}) |", orderPosition);
+            foreach (string s in orders)
+            {
+                ordersCenter += String.Format(" {0} |", s);
+            }
+            if (pos != ordersCount)
+                ordersCenter += new string(' ', (125 - ordersCenter.Length - 3) / 2) + "...";
+
+            ordersCenter = ordersCenter.PadRight(125);
+            ordersCenter += '|';
+            screen += ordersCenter + ordersTemp;
+
+            screen += "[ " + screenMessage.PadRight(123) + "]";
+            screen += new string(' ', 126);
+            screen += "   |  Channel  0  |  Channel  1  |  Channel  2  |  Channel  3  |  Channel  4  |  Channel  5  |  Channel  6  |  Channel  7  |  ";
+            string[] patterns = Driver.GetPatternAsString(currentPattern);
+            string screen2 = "";
+            for (int i = 0; i < patterns.Length; i++)
+            {
+                screen2 += i.ToString("d2") + " " + patterns[i] + "  ";
+            }
+
+            int tempx = Console.CursorLeft;
+            int tempy = Console.CursorTop;
+
+            //Console.OpenStandardOutput().Write(Encoding.ASCII.GetBytes(screen), 0, screen.Length);
+
+            //Console.Clear();
+            //Console.SetWindowSize(126, 42);
+            //Console.SetWindowPosition(0, 0);
+            //Console.Write(screen);
+            //Console.SetCursorPosition(tempx, tempy);
+
+            SafeFileHandle h = CreateFile("CONOUT$", 0x40000000, 2, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
+
+            if (!h.IsInvalid)
+            {
+                CharInfo[] buf = new CharInfo[126 * 42];
+                SmallRect rect = new SmallRect() { Left = 0, Top = 0, Right = 126, Bottom = 42 };
+                short[] noteColours = {
+                    (int)ConsoleColor.White,
+                    (int)ConsoleColor.Red,
+                    (int)ConsoleColor.Red,
+                    (int)ConsoleColor.Red,
+                    (int)ConsoleColor.White,
+                    (int)ConsoleColor.Blue,
+                    (int)ConsoleColor.Blue,
+                    (int)ConsoleColor.White,
+                    (int)ConsoleColor.Green,
+                    (int)ConsoleColor.Green,
+                    (int)ConsoleColor.Green,
+                    (int)ConsoleColor.White,
+                    (int)ConsoleColor.Yellow,
+                    (int)ConsoleColor.Yellow,
+                    (int)ConsoleColor.Yellow,
+                };
+
+                short[] lineColours = new short[126];
+                int i;
+                for (i = 3; i < 124; i++)
+                {
+                    lineColours[i] = (short)(noteColours[(i - 3) % (noteColours.Length)] | 0x0000);
+                }
+                lineColours[0] = (int)ConsoleColor.Blue;
+                lineColours[1] = (int)ConsoleColor.Blue;
+
+                for (i = 0; i < screen.Length; i++)
+                {
+                    buf[i].Attributes = 15;
+                    buf[i].Char.UnicodeChar = screen[i];
+                }
+                for (i = 0; i < screen2.Length; i++)
+                {
+                    buf[i + screen.Length].Attributes =
+                        (short)(((i % 126 <= 1 && (i / 126) % 4 == 0) ?
+                        (i / 126) % 16 == 0 ? (int)ConsoleColor.Green :
+                        (int)ConsoleColor.Red : lineColours[i % 126])
+                        | (i / 126 == currentRow ? 0x80 : 0));
+
+                    buf[i + screen.Length].Char.UnicodeChar = screen2[i];
+                }
+
+                bool b = WriteConsoleOutput(h, buf,
+                    new Coord() { X = 126, Y = 42 },
+                    new Coord() { X = 0, Y = 0 },
+                    ref rect);
+            }
         }
 
         //! returns the last key from the user
@@ -151,11 +1219,65 @@ namespace BasicTracker
             return lastkey;
         }
 
-        //! Gets a key from the user and set lastkey to it.
+        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern SafeFileHandle CreateFile(
+            string fileName,
+            [MarshalAs(UnmanagedType.U4)] uint fileAccess,
+            [MarshalAs(UnmanagedType.U4)] uint fileShare,
+            IntPtr securityAttributes,
+            [MarshalAs(UnmanagedType.U4)] FileMode creationDisposition,
+            [MarshalAs(UnmanagedType.U4)] int flags,
+            IntPtr template);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool WriteConsoleOutput(
+            SafeFileHandle hConsoleOutput,
+            CharInfo[] lpBuffer,
+            Coord dwBufferSize,
+            Coord dwBufferCoord,
+            ref SmallRect lpWriteRegion);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct Coord
+        {
+            public short X;
+            public short Y;
+
+            public Coord(short X, short Y)
+            {
+                this.X = X;
+                this.Y = Y;
+            }
+        };
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct CharUnion
+        {
+            [FieldOffset(0)] public char UnicodeChar;
+            [FieldOffset(0)] public byte AsciiChar;
+        }
+
+        [StructLayout(LayoutKind.Explicit)]
+        public struct CharInfo
+        {
+            [FieldOffset(0)] public CharUnion Char;
+            [FieldOffset(2)] public short Attributes;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct SmallRect
+        {
+            public short Left;
+            public short Top;
+            public short Right;
+            public short Bottom;
+        }
+
+        //! Gets a key from the user and sets lastkey to it.
         /* It wraps the Console.ReadKey instruction so that keys can do various things
-         * they can't do in the original console, such at control moving far and F1 loading
-         * help. If there is no key available it is non blocking, and will set it to null instead.
-         */
+        * they can't do in the original console, such as control moving far and F1 loading
+        * help. If there is no key available it is non blocking, and will set it to null instead.
+        */
         public static void RefreshKeys()
         {
             if (Console.KeyAvailable)
@@ -170,359 +1292,33 @@ namespace BasicTracker
             }
             else lastkey = null;
         }
-    }
-    //! Data structure for all things related to the song itself
-    /*! Handles things like loading and saving to disk, storage
-     * of data in memory, and playback
-     */
-    class Song
-    {
-        private List<Pattern> patterns; //!< The unordered list of patterns that are used in the project.
-        private string songname; //!< The 30 character name of the song.
-        private string authorname; //!< The 30 character name of the musician.
-        private List<ushort> orders; //!< The ordered list of which pattern happens when. Patterns may appear more than once, allowing repetition.
-        private Version createdVersion; //!< The version of Basic Tracker that the loaded song was created in.
-        private Version compatibleVersion; //!< The lowest version of Basic Tracker this song will run in. Usually the same as the created version.
-        private byte globalVol; //!< The global volume, from 00 to 7f.
-        private byte speed; //!< The speed of the song. It's how many ticks are run for each row of the song. Larger values increase accuracy in a way but slow the song down.
-        private byte tempo; //!< The tempo of the song in BPM. The row speed is therefore tempo*4
-        private byte[] chanVol; //!< The initial value of all the channel's volumes
-        private byte[] chanPan; //!< The initial value of all the channel's pans
 
-        //! Empty contructor
-        /*! Creates a new song that is empty. This is always called at program boot.
-         */
-        public Song()
+        public static void handleScreen()
         {
-            patterns = new List<Pattern>();
-            songname = "                              ";
-            authorname = "                              ";
-            orders = new List<ushort>();
-            createdVersion = typeof(Program).Assembly.GetName().Version;
-            compatibleVersion = createdVersion;
-            globalVol = 0x7F;
-            speed = 0x10;
-            tempo = 0x10;
-            chanVol = new byte[] { 0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f };
-            chanPan = new byte[] { 0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40 };
-        }
-
-        //! Loads a song from a BSCM file
-        /*! Takes a reader and sets itself to the state of the song stored in the file.
-         * The file does not contain anything which is not settable by the user, like the global
-         * volume. This can be set using a volume command in the pattern.
-         * 
-         * @param[in] br A binary stream which is the file to read from.
-         */
-        public void loadfromfile(BinaryReader br)
-        {
-            if (br.ReadChars(4) != G.signature)
+            if (screenTime.ElapsedMilliseconds > 3000)
             {
-                throw new IOException();
+                screenMessage = "All Right!";
+                RefreshScreen();
+                screenTime.Reset();
             }
-            songname = br.ReadChars(30).ToString();
-            authorname = br.ReadChars(30).ToString();
-            orders = new List<ushort>(br.ReadUInt16());
-            patterns = new List<Pattern>(br.ReadUInt16());
-            uint[] patternPtr = new uint[patterns.Capacity];
-            ushort tempver = br.ReadUInt16();
-            createdVersion = new Version(
-                tempver & 0x0F00 >> 12,
-                tempver & 0x00FF);
-            tempver = br.ReadUInt16();
-            compatibleVersion = new Version(
-                tempver & 0x0F00 >> 12,
-                tempver & 0x00FF);
-            br.ReadChars(6); //reserved bytes
-            globalVol = 0;
-            speed = br.ReadByte();
-            tempo = br.ReadByte();
-            for (int i = 0; i < orders.Capacity; i++)
+            if (Console.BufferWidth != 126 | Console.BufferHeight != 42) // Auto fix the screen size if the user tries to mess with it.
             {
-                orders[i] = br.ReadUInt16();
-            }
-            for (int i = 0; i < patternPtr.Length; i++)
-            {
-                patternPtr[i] = br.ReadUInt32();
-            }
-            foreach (uint i in patternPtr)
-            {
-                br.BaseStream.Seek(i,SeekOrigin.Begin);
-                ushort patlen = br.ReadUInt16();
-                ushort rowlen = br.ReadUInt16();
-                patterns[(int)i] = decodePattern(patlen, rowlen, br.ReadBytes(patlen));
+                Console.SetWindowSize(126, 42);
+                Console.SetBufferSize(126, 42);
+                Console.SetWindowPosition(0, 0);
             }
         }
 
-        //! Loads a pattern
-        /*! Loads a pattern from the file slice.
-         * 
-         * @param patlen The length of the pattern in bytes
-         * @param rowlen The number of rows
-         * 
-         * @return The decoded pattern
-         */
-        private Pattern decodePattern(ushort patlen, ushort rowlen, byte[] data)
+        public static void waitOnTick()
         {
-            Pattern pattern = new Pattern();
-            int[] prevMaskVars = new int[8];
-            byte[] prevNote = new byte[8];
-            byte[] prevInst = new byte[8];
-            volumeParameter[] prevVolume = new volumeParameter[8];
-            effectParameter[] prevEffect = new effectParameter[8];
-            using (Stream st = new MemoryStream(data))
-            {
-                for (int row = 0; true; row++)
-                {
-                    Note note = new Note();
-                    int channelVar = st.ReadByte();
-                    if (channelVar == 0) break;
-                    int channel = (channelVar - 1) & 7;
-                    int maskVar;
-                    if ((channelVar & 128) != 0)
-                    {
-                        maskVar = st.ReadByte();
-                        prevMaskVars[channel] = maskVar;
-                    }
-                    else
-                    {
-                        maskVar = prevMaskVars[channel];
-                    }
-                    if ((maskVar & 1) != 0)
-                    {
-                        byte tempnote = (byte)st.ReadByte();
-                        note.internal_note = tempnote;
-                        prevNote[channel] = tempnote;
-                    }
-                    if ((maskVar & 2) != 0)
-                    {
-                        note.instrument = (byte)st.ReadByte();
-                        prevInst[channel] = note.instrument;
-                    }
-                    if ((maskVar & 4) != 0)
-                    {
-                        note.volume = note.decodeVolume((byte)st.ReadByte());
-                        prevVolume[channel] = note.volume;
-                    }
-                    if ((maskVar & 8) != 0)
-                    {
-                        effectParameter command = new effectParameter
-                        {
-                            type = (effectParameter.Type)st.ReadByte(),
-                            value = (byte)st.ReadByte()
-                        };
-                        note.effect = command;
-                        prevEffect[channel] = command;
-                    }
-                    if ((maskVar & 16) != 0)
-                    {
-                        note.internal_note = prevNote[channel];
-                    }
-                    if ((maskVar & 32) != 0)
-                    {
-                        note.instrument = prevInst[channel];
-                    }
-                    if ((maskVar & 64) != 0)
-                    {
-                        note.volume = prevVolume[channel];
-                    }
-                    if ((maskVar & 128) != 0)
-                    {
-                        note.effect = prevEffect[channel];
-                    }
-                    pattern.channels[channel].notes[row] = note;
-                }
-            }
-            return pattern;
+            frameTimer.Stop();
+            TimeSpan timeForOne = TimeSpan.FromSeconds((15.0 / Driver.Tempo) / Driver.Speed);
+            int rest = (timeForOne - frameTimer.Elapsed).Milliseconds;
+            if (rest > 0)
+                System.Threading.Thread.Sleep(rest);
+            else
+                System.Threading.Thread.Sleep(0);
+            frameTimer.Restart();
         }
-    }
-    //! A single pattern
-    /*! Stores only channel data really
-     */
-    class Pattern
-    {
-        public Channel[] channels = new Channel[G.channels];
-        //! inits channels
-        public Pattern()
-        {
-            for (int i = 0; i < G.channels; i++)
-            {
-                channels[i] = new Channel();
-            }
-        }
-    }
-    //! Contains notes
-    class Channel
-    {
-        public Note[] notes = new Note[G.depth];
-    }
-    //! A single note.
-    /*! The grid is made of these. Stores the value,
-     * instrument, volume, effect and effect parameter.
-     */
-    class Note
-    {
-        //! The note value
-        public enum N
-        {
-            C_, //!< C
-            Db, //!< D flat
-            D_, //!< D
-            Eb, //!< E flat
-            E_, //!< E
-            F_, //!< F
-            Gb, //!< G flat
-            G_, //!< G
-            Ab, //!< A flat
-            A_, //!< A
-            Bb, //!< B flat
-            B_, //!< B
-            END = 254,  //!< end note, stop channel (===)
-            EMPTY = 255 //!< undefined, yet to be input (-_-)
-        }
-        public N note { get; private set; }
-        public int octave { get; private set; }
-        //! Set the internal note to the note and octave for later retrieval.
-        public byte internal_note
-        {
-            set {
-                note = (N)(value % 12);
-                octave = value / 12;
-                internal_note = value;
-            }
-            private get { return internal_note; }
-        }
-        public byte instrument; //!< The instrument
-        public volumeParameter volume;
-        public effectParameter effect;
-        //! part of the file loading. Decodes what effect is in the volume column because of course.
-        /*! Removed most of this code to simplify the tracker. It's a shame but I simply
-         * can't implement all of this in the time allotted.
-         */
-        public volumeParameter decodeVolume(byte vol)
-        {
-            volumeParameter param = new volumeParameter();
-            //if (vol <= 64)
-            //{
-            //    param.type = volumeParameter.Type.V;
-            //    param.value = vol;
-            //}
-            //else if (vol <= 74)
-            //{
-            //    param.type = volumeParameter.Type.A;
-            //    param.value = (byte)(vol - 64);
-            //}
-            //else if (vol <= 84)
-            //{
-            //    param.type = volumeParameter.Type.B;
-            //    param.value = (byte)(vol - 74);
-            //}
-            //else if (vol <= 94)
-            //{
-            //    param.type = volumeParameter.Type.C;
-            //    param.value = (byte)(vol - 84);
-            //}
-            //else if (vol <= 104)
-            //{
-            //    param.type = volumeParameter.Type.D;
-            //    param.value = (byte)(vol - 94);
-            //}
-            //else if (vol <= 114)
-            //{
-            //    param.type = volumeParameter.Type.E;
-            //    param.value = (byte)(vol - 104);
-            //}
-            //else if (vol <= 124)
-            //{
-            //    param.type = volumeParameter.Type.F;
-            //    param.value = (byte)(vol - 114);
-            //}
-            //else if (vol <= 127)
-            //{
-            //    throw new Exception("Unknown volume value");
-            //}
-            //else if (vol <= 192)
-            //{
-            //    param.type = volumeParameter.Type.P;
-            //    param.value = (byte)(vol - 128);
-            //}
-            //else if (vol <= 202)
-            //{
-            //    param.type = volumeParameter.Type.H;
-            //    param.value = (byte)(vol - 192);
-            //}
-            //else if (vol <= 212)
-            //{
-            //    param.type = volumeParameter.Type.V;
-            //    param.value = (byte)(vol - 202);
-            //}
-            //else
-            //{
-            //    throw new Exception("Unknown volume value");
-            //}
-            param.value = vol;
-            param.type = volumeParameter.Type.V;
-            return param;
-        }
-    }
-    //! a data type to hold the Volume parameter
-    /* holds the value and type - but type is always "V" so that's nice
-     */
-    struct volumeParameter
-    {
-        public enum Type
-        {
-            A, //!< Fine Volume Slide Up
-            B, //!< Fine Volume Slide Down
-            C, //!< Volume Slide Up 
-            D, //!< Volume Slide Down
-            E, //!< Portamento Down
-            F, //!< Portamento Up
-            G, //!< Tone Portamento
-            H, //!< Vibrato Depth
-            P, //!< Set Panning
-            V  //!< Set Volume
-        }
-        public Type type;
-        public byte value;
-    }
-    //! a data type to hold the Effect parameter
-    /* holds the value and type.
-     */
-    struct effectParameter
-    {
-        public enum Type
-        {
-            A, //!< Set Speed 
-            B, //!< Position Jump
-            C, //!< Pattern Break
-            D, //!< Volume Slide
-            E, //!< Portamento Down
-            F, //!< Portamento Up
-            G, //!< Tone Portamento
-            H, //!< Vibrato
-            I, //!< Tremor
-            J, //!< Arpeggio
-            K, //!< Volume Slide + Vibrato 
-            L, //!< Volume Slide + Tone Portamento
-            M, //!< Set Channel Volume 
-            N, //!< Channel Volume Slide
-            O, 
-            P, //!< Panning Slide
-            Q, //!< Retrigger
-            R, //!< Tremolo 
-            S, //!< Special
-            T, //!< Tempo 
-            U, //!< Fine Vibrato 
-            V, //!< Set Global Volume 
-            W, //!< Global Volume Slide 
-            X, //!< Set Panning 
-            Y, //!< Panbrello
-            Z, //!< Filter coefficients
-            _0  //!< Parameter Extension
-
-        }
-        public Type type;
-        public byte value;
     }
 }
