@@ -18,7 +18,7 @@ namespace BasicTracker
         private static Channel clipboardChannel = new Channel();
 
         static double[] chanPreGain = new double[] { 255, 255, 255, 255, 255, 255, 255, 255 };
-        static float[] chanPostGain = new float[] { 1, 1, 1, 1, 1, 1, 1, 1 };
+        static double[] chanPostGain = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
         static double[] chanPitch = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 };
         static double[] chanPan = new double[] { 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f };
         static double masterGain = 255;
@@ -34,6 +34,10 @@ namespace BasicTracker
         private static int[] tremoloWaveform = new int[8];
         private static int[] panbrelloWaveform = new int[8];
         private static int nonResetTickCounter;
+
+        private static int patternLoop;
+        private static int loopPoint;
+        private static int rowLoop;
 
         private static double[,] waveformTables = new double[4, 256];
         static readonly double[] pitches =
@@ -404,14 +408,16 @@ namespace BasicTracker
             {
                 playbackStarted = true;
                 bool jumped = false;
+                bool looped = false;
+                int extension = 0;
                 for (int channelIndex = 0; channelIndex < 8; channelIndex++)
                 {
                     Channel channel = song.patterns[orders[order] - 1].channels[channelIndex];
                     Note note = channel.notes[row];
 
-                    if ((note.effect.type == effectParameter.Type.S && (note.effect.value & 0xF0) == 0x40) //If the effect is S4x
-                        ? (tickCounter == (note.effect.value & 0xF)) // And the delay is reached
-                        : (tickCounter == 0)) //Or it's not S4x and it's the start of a row
+                    if (note.effect.type == effectParameter.Type.S && ((note.effect.value & 0xF0) == 0x40) && (tickCounter == (note.effect.value & 0xF))  //If the effect is S4x and the delay is reached
+                        || ((rowLoop == 0) //If the effect is SEx and the delay has just started
+                        && (tickCounter == 0))) //Or it's just the start of a row
                     {
                         if (note.note != Note.N.EMPTY)
                         {
@@ -439,7 +445,7 @@ namespace BasicTracker
                         }
                     }
                     //handle effects
-                    handleEffects(ref jumped, channelIndex, channel, note, note.effect);
+                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, note.effect);
                     AudioSubsystem.SetPitch(channelIndex, chanPitch[channelIndex]);
                     AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 255.0f);
                     AudioSubsystem.SetPreGain(channelIndex, Math.Max(Math.Min(chanPreGain[channelIndex] / 255.0, 1.0), 0.0));
@@ -450,20 +456,19 @@ namespace BasicTracker
                     masterGain = 255;
                 }
                 else if (masterGain < 0) masterGain = 0;
-                AudioSubsystem.SetMasterGain((float)masterGain / 255.0f);
-
-                if (tickCounter == Speed)
+                AudioSubsystem.SetMasterGain(masterGain / 255.0);
+                if (tickCounter == Speed+extension)
                 {
                     tickCounter = 0;
                 }
                 else
-                if (++tickCounter == Speed)
+                if (++tickCounter == Speed+extension)
                 {
                     if (PlayRows > 0)
                     {
                         PlayRows--;
                     }
-                    if (PlayRows != 0)
+                    if (PlayRows != 0 && rowLoop == 0)
                     {
                         row++;
                         Consolex.rowTo(row);
@@ -487,7 +492,7 @@ namespace BasicTracker
             }
         }
 
-        private static void handleEffects(ref bool jumped, int channelIndex, Channel channel, Note note, effectParameter effect)
+        private static void handleEffects(ref bool jumped, ref bool looped, ref int extension, int channelIndex, Channel channel, Note note, effectParameter effect)
         {
             int value;
             switch (effect.type)
@@ -544,42 +549,7 @@ namespace BasicTracker
                 case effectParameter.Type.D:
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
-                    if (value == 0xff)
-                    {
-                        Consolex.SetMessage(effectBad(row, channelIndex) + "Parameter for Dxx cannot be FF");
-                    }
-                    else
-                    if ((value & 0xF0) == 0)
-                    {
-                        if (tickCounter != 0)
-                        {
-                            chanPreGain[channelIndex] -= (byte)(value & 0xF);
-                        }
-                    }
-                    else
-                    if ((value & 0x0F) == 0)
-                    {
-                        if (tickCounter != 0)
-                        {
-                            chanPreGain[channelIndex] += (byte)((value & 0xF0) >> 4);
-                        }
-                    }
-                    else
-                    if ((value & 0xF0) == 0xF0)
-                    {
-                        if (tickCounter == 0)
-                        {
-                            chanPreGain[channelIndex] -= (byte)(value & 0xF);
-                        }
-                    }
-                    else
-                    if ((value & 0x0F) == 0xF)
-                    {
-                        if (tickCounter == 0)
-                        {
-                            chanPreGain[channelIndex] += (byte)((value & 0xF0) >> 4);
-                        }
-                    }
+                    affectVolume(ref chanPreGain[channelIndex], value, channelIndex);
                     break;
                 case effectParameter.Type.E:
                 case effectParameter.Type.F:
@@ -636,11 +606,13 @@ namespace BasicTracker
                     }
                     break;
                 case effectParameter.Type.H:
+                case effectParameter.Type.U:
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     waveformTablePointer[channelIndex] += (value & 0xf0) >> 2;
                     waveformTablePointer[channelIndex] %= 256;
-                    chanPitch[channelIndex] *= 1 + (waveformTables[vibratoWaveform[channelIndex], waveformTablePointer[channelIndex]] * (value & 0xF) / 16.0);
+                    chanPitch[channelIndex] *= 1 + (waveformTables[vibratoWaveform[channelIndex], waveformTablePointer[channelIndex]] * (value & 0xF) / 
+                        (effect.type == effectParameter.Type.H ? 8.0 : 32.0));
                     break;
                 case effectParameter.Type.R:
                     value = findPrevious(effect, channel, channelIndex, row);
@@ -671,10 +643,246 @@ namespace BasicTracker
                     if (value == -1) break;
                     if ((note.note != Note.N.EMPTY) && (note.note != Note.N.END))
                     {
-                        previousNote[channelIndex] = pitches[note.internal_note];
+                        previousNote[channelIndex] = note.internal_note;
                     }
-
+                    else if ((int)previousNote[channelIndex] >= pitches.Length)
+                    {
+                        previousNote[channelIndex] = pitches.Length / 2;
+                    }
+                    switch (tickCounter % 3)
+                    {
+                        case 0:
+                            chanPitch[channelIndex] = pitches[(int)previousNote[channelIndex]];
+                            break;
+                        case 1:
+                            chanPitch[channelIndex] = pitches[(int)previousNote[channelIndex] + ((value & 0xf0) >> 4)];
+                            break;
+                        case 2:
+                            chanPitch[channelIndex] = pitches[(int)previousNote[channelIndex] + (value & 0xf) + ((value & 0xf0) >> 4)];
+                            break;
+                    }
                     break;
+                case effectParameter.Type.K:
+                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
+                    {
+                        type = effectParameter.Type.D,
+                        value = effect.value
+                    });
+                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
+                    {
+                        type = effectParameter.Type.H,
+                        value = 0
+                    });
+                    break;
+                case effectParameter.Type.L:
+                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
+                    {
+                        type = effectParameter.Type.D,
+                        value = effect.value
+                    });
+                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
+                    {
+                        type = effectParameter.Type.G,
+                        value = 0
+                    });
+                    break;
+                case effectParameter.Type.M:
+                    chanPostGain[channelIndex] = effect.value;
+                    break;
+                case effectParameter.Type.N:
+                    value = findPrevious(effect, channel, channelIndex, row);
+                    if (value == -1) break;
+                    affectVolume(ref chanPostGain[channelIndex], value, channelIndex);
+                    break;
+                case effectParameter.Type.P:
+                    value = findPrevious(effect, channel, channelIndex, row);
+                    if (value == -1) break;
+                    affectVolume(ref chanPan[channelIndex], value, channelIndex);
+                    break;
+                case effectParameter.Type.Q:
+                    value = findPrevious(effect, channel, channelIndex, row);
+                    if (value == -1) break;
+                    if (tickCounter % (value & 0xf) == 0)
+                    {
+                        AudioSubsystem.Start(channelIndex);
+                        switch ((value & 0xf0) >> 4)
+                        {
+                            case 1:  chanPreGain[channelIndex] -= 1; break;
+                            case 2:  chanPreGain[channelIndex] -= 2; break;
+                            case 3:  chanPreGain[channelIndex] -= 4; break;
+                            case 4:  chanPreGain[channelIndex] -= 8; break;
+                            case 5:  chanPreGain[channelIndex] -= 16; break;
+                            case 6:  chanPreGain[channelIndex] /= 1.5; break;
+                            case 7:  chanPreGain[channelIndex] /= 2; break;
+                            case 9:  chanPreGain[channelIndex] += 1; break;
+                            case 10: chanPreGain[channelIndex] += 2; break;
+                            case 11: chanPreGain[channelIndex] += 4; break;
+                            case 12: chanPreGain[channelIndex] += 8; break;
+                            case 13: chanPreGain[channelIndex] += 16; break;
+                            case 14: chanPreGain[channelIndex] *= 1.5; break;
+                            case 15: chanPreGain[channelIndex] *= 2; break;
+                        }
+                    }
+                    break;
+                case effectParameter.Type.T:
+                    value = findPrevious(effect, channel, channelIndex, row);
+                    if (value == -1) break;
+                    if (value < 0x10)
+                    {
+                        Tempo -= (byte)(value & 0xf);
+                    }
+                    else if (value < 0x20)
+                    {
+                        Tempo -= (byte)(value & 0xf);
+                    } else
+                    {
+                        Tempo = (byte)value;
+                    }
+                    break;
+                case effectParameter.Type.V:
+                    masterGain = effect.value;
+                    break;
+                case effectParameter.Type.W:
+                    value = findPrevious(effect, channel, channelIndex, row);
+                    if (value == -1) break;
+                    affectVolume(ref masterGain, value, channelIndex);
+                    break;
+                case effectParameter.Type.X:
+                    chanPan[channelIndex] = effect.value;
+                    break;
+                default:
+                    Consolex.SetMessage(effectBad(row, channelIndex) + "Unknown effect");
+                    break;
+                case effectParameter.Type.S:
+                    switch ((effect.value & 0xf0) >> 4)
+                    {
+                        case 0:
+                            Consolex.SetMessage(effectBad(row, channelIndex) + "S0x does nothing");
+                            break;
+                        case 1:
+                            Consolex.SetMessage(effectBad(row, channelIndex) + "S1x is not supported");
+                            break;
+                        case 2:
+                            Consolex.SetMessage(effectBad(row, channelIndex) + "This is not an Amiga");
+                            break;
+                        case 3:
+                            vibratoWaveform[channelIndex] = (effect.value & 0xf);
+                            break;
+                        case 4:
+                            tremoloWaveform[channelIndex] = (effect.value & 0xf);
+                            break;
+                        case 5:
+                            panbrelloWaveform[channelIndex] = (effect.value & 0xf);
+                            break;
+                        case 6:
+                            extension += (effect.value & 0xf);
+                            break;
+                        case 7:
+                            Consolex.SetMessage(effectBad(row, channelIndex) + "New Note Actions are not supported.");
+                            break;
+                        case 8:
+                            chanPan[channelIndex] = (effect.value & 0xf) << 4;
+                            break;
+                        case 9:
+                            switch (effect.value & 0xf)
+                            {
+                                case 0:
+                                    surround[channelIndex] = false;
+                                    break;
+                                case 1:
+                                    surround[channelIndex] = true;
+                                    break;
+                                case 2:
+                                    AudioSubsystem.SetFM(channelIndex, false);
+                                    break;
+                                case 3:
+                                    AudioSubsystem.SetFM(channelIndex, true);
+                                    break;
+                                default:
+                                    Consolex.SetMessage(effectBad(row, channelIndex) + "Sound control does not exist.");
+                                    break;
+                            }
+                            break;
+                        case 10:
+                            Consolex.SetMessage(effectBad(row, channelIndex) + "This is not a sampler");
+                            break;
+                        case 11:
+                            if ((effect.value & 0xf) == 0)
+                            {
+                                loopPoint = row;
+                            }
+                            else
+                            {
+                                if (patternLoop == (effect.value & 0xf))
+                                {
+                                    patternLoop = 0;
+                                }
+                                else
+                                {
+                                    patternLoop++;
+                                    row = loopPoint;
+                                    Consolex.rowTo(row);
+                                }
+                            }
+                            break;
+                        case 12:
+                            if (tickCounter == (effect.value & 0xf))
+                                AudioSubsystem.Stop(channelIndex);
+                            break;
+                        case 14:
+                            if (looped) break;
+                            if (tickCounter > 0) break;
+                            if (rowLoop == 0)
+                            {
+                                rowLoop = effect.value & 0xf;
+                            }
+                            else
+                            {
+                                rowLoop -= 1;
+                            }
+                            break;
+                    }
+                    break;
+            }
+        }
+
+        private static void affectVolume(ref double variable, int value, int channelIndex)
+        {
+            if (value == 0xff)
+            {
+                Consolex.SetMessage(effectBad(row, channelIndex) + "Parameter cannot be FF");
+            }
+            else
+            if ((value & 0xF0) == 0)
+            {
+                if (tickCounter != 0)
+                {
+                    variable -= (byte)(value & 0xF);
+                }
+            }
+            else
+            if ((value & 0x0F) == 0)
+            {
+                if (tickCounter != 0)
+                {
+                    variable += (byte)((value & 0xF0) >> 4);
+                }
+            }
+            else
+            if ((value & 0xF0) == 0xF0)
+            {
+                if (tickCounter == 0)
+                {
+                    variable -= (byte)(value & 0xF);
+                }
+            }
+            else
+            if ((value & 0x0F) == 0xF)
+            {
+                if (tickCounter == 0)
+                {
+                    variable += (byte)((value & 0xF0) >> 4);
+                }
             }
         }
 
@@ -685,7 +893,8 @@ namespace BasicTracker
             {
                 previousEffects[(int)effect.type] = effect.value;
             }
-            else if (previousEffects[(int)effect.type] == 0){
+            else if (previousEffects[(int)effect.type] == 0)
+            {
                 int i;
                 for (i = row; i >= 0; i--)
                 {

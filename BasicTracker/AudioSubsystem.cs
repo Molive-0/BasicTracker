@@ -76,13 +76,13 @@ namespace BasicTracker
             }
         }
 
-        public static void SetPostGain(int channel, float left, float right) { t.SetPostGain(channel, left, right); }
+        public static void SetPostGain(int channel, double left, double right) { t.SetPostGain(channel, left, right); }
         public static void SetPreGain(int channel, double value) { t.SetPreGain(channel, value); }
         public static void SetFM(int channel, bool value) { t.SetFM(channel, value); }
         public static void SetInstrument(int channel, int value) { t.SetInstrument(channel, value); }
         public static void SetPitch(int channel, double value) { t.SetPitch(channel, value); }
-        public static void SetPan(int channel, float value) { t.SetPan(channel, value); }
-        public static void SetMasterGain(float value) { t.SetMasterGain(value); }
+        public static void SetPan(int channel, double value) { t.SetPan(channel, value); }
+        public static void SetMasterGain(double value) { t.SetMasterGain(value); }
         public static void Start(int channel) { t.Start(channel); }
         public static void Stop(int channel) { t.Stop(channel); }
 
@@ -110,13 +110,13 @@ namespace BasicTracker
             private PanningSampleProvider[] panners;
             private SurroundSampleProvider[] gainers;
 
-            public void SetPostGain(int channel, float valueLeft, float valueRight) { gainers[channel].VolumeLeft = valueLeft; gainers[channel].VolumeRight = valueRight; }
+            public void SetPostGain(int channel, double valueLeft, double valueRight) { gainers[channel].VolumeLeft = (float)valueLeft; gainers[channel].VolumeRight = (float)valueRight; }
             public void SetPreGain(int channel, double value) => channels[channel].SetGain(value);
             public void SetFM(int channel, bool value) => channels[channel].SetModulation(value);
             public void SetInstrument(int channel, int value) => channels[channel].SetInstrument(value);
             public void SetPitch(int channel, double value) => channels[channel].SetPitch(value);
-            public void SetPan(int channel, float value) => panners[channel].Pan = (float)((value/128.0)-1.0);
-            public void SetMasterGain(float value) => masterGain.Volume = value / 8.0f;
+            public void SetPan(int channel, double value) => panners[channel].Pan = (float)((value/128.0)-1.0);
+            public void SetMasterGain(double value) => masterGain.Volume = (float)(value / 8.0);
             public void Start(int channel) => channels[channel].Start();
             public void Stop(int channel) => channels[channel].Stop();
 
