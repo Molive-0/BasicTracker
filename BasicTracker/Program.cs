@@ -1108,8 +1108,8 @@ namespace BasicTracker
                 pos++;
                 len += 3 + order.Length;
             }
-            //if (pos != ordersCount)
-            //    orders.RemoveAt(orders.Count() - 1);
+            if (len > 92)
+                orders.RemoveAt(orders.Count() - 1);
 
             string ordersTemp = "+----------------------------+";
             foreach (string s in orders)
