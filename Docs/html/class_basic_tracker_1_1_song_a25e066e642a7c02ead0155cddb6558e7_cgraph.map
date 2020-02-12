@@ -1,5 +1,0 @@
-<map id="BasicTracker.Song.loadfromfile" name="BasicTracker.Song.loadfromfile">
-<area shape="rect" id="node1" title="Loads a song from a BSCM file." alt="" coords="5,13,207,39"/>
-<area shape="rect" id="node2" href="$class_basic_tracker_1_1_song.html#aff0c24ff12def6b44051c106cf7dbe83" title="Loads a pattern." alt="" coords="255,5,433,47"/>
-<area shape="rect" id="node3" href="$class_basic_tracker_1_1_note.html#a2614596470ab7dcc0b88030eb3758561" title="part of the file loading. Decodes what effect is in the volume column because of course." alt="" coords="481,5,656,47"/>
-</map>
