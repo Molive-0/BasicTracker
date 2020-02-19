@@ -57,7 +57,7 @@ namespace BasicTracker
             "6-A are LFO versions of instruments 1-5.\n" +
             "To move the cursor around the screen, use the arrow keys. Holding CTRL while moving allows you to\n" +
             "move whole columns at a time.\n" +
-            "To start playback, press space. To stop, press space again. Pressing the enter key move the playback\n" +
+            "To start playback, press space. To stop, press space again. Pressing the enter key moves the playback\n" +
             "cursor to the position of the edit cursor, and plays that row by itself. To stop the sound system\n" +
             "outputting sound press Tab.\n" +
             "If you are on a pattern where the playback cursor is not, and you press space to start playback you\n" +
@@ -194,16 +194,16 @@ namespace BasicTracker
         public static bool alt { get; private set; } //!< Cached bool for if the Alt key is pressed. The setter is private.
         private static ConsoleKey? lastkey; //!< Cached value for last key pressed. It's private, but there's a public GetKey that returns it.
 
-        private static int octave;
-        private static int currentPattern;
-        private static int instrument;
-        private static int orderPosition;
-        private static int currentRow;
-        private static string screenMessage;
-        private static Stopwatch screenTime = new Stopwatch();
-        private static Stopwatch frameTimer = new Stopwatch();
+        private static int octave; //!< The current octave for inputting notes. It's also shown in the GUI
+        private static int currentPattern; //!< The current pattern shown on screen
+        private static int instrument; //!< The current instrument for inputting notes. It's also shown in the GUI
+        private static int orderPosition; //!< How far scrolled over the order row is. It's also shown at the left of the bar.
+        private static int currentRow; //!< Where the playback cursor is, used for rendering it to the screen.
+        private static string screenMessage; //!< Thee messagee used for the message bar.
+        private static Stopwatch screenTime = new Stopwatch(); //!< How long the message bar has been up, used to remove it after 3 seconds.
+        private static Stopwatch frameTimer = new Stopwatch(); //!< How long the tick has been processing for, used to keep time in playback and to regulate the input processing.
 
-        private static bool helpOpen = false;
+        private static bool helpOpen = false; //!< Is the help window open? Used so that it doesn't open twice.
 
         //! Empty static console constructor
         /*! init run automatically before anything else.
@@ -258,6 +258,11 @@ namespace BasicTracker
             screenMessage = "All Right!";
             RefreshScreen();
         }
+        //! Converts a key to the ascii equivalent.
+        /*! This is to try and fix a weird OEM bug in handling the keys pressed by the user, in that
+         * sometimes the manufacturer of the keyboard changes up what all the keycodes are. We instead
+         * call the windows API for converting it over because that fixes it in all cases. Hopefully.
+         */
         public static char ToAscii(Keys key, Keys modifiers)
         {
             var outputBuilder = new StringBuilder(2);
@@ -269,7 +274,9 @@ namespace BasicTracker
                 return ' ';
         }
 
+        //! Highest bit mask.
         private const byte HighBit = 0x80;
+        //! Returns modifiers on a key, like shift or control. Used for ascii conversion.
         private static byte[] GetKeyState(Keys modifiers)
         {
             var keyState = new byte[256];
@@ -282,7 +289,7 @@ namespace BasicTracker
             }
             return keyState;
         }
-
+        //! Windows API ascii conversion. See the other "ToAscii" function.
         [DllImport("user32.dll")]
         private static extern int ToAscii(uint uVirtKey, uint uScanCode,
                                           byte[] lpKeyState,
@@ -299,9 +306,9 @@ namespace BasicTracker
         private static extern IntPtr GetConsoleWindow();
 
         //! Handles the cursor movement
-        /*! It calls the handle movement code on the frontmost window - 
-         * but there's only one window after the hybrid restructure.
-         * It's now redundant in this case.
+        /*! This handles basically everything in terms of keyboard input from the user. It's not a switch case because a lot of the
+         * tests require multiple checks for things likee modifiers or other scenarios. There's extra comments in the code as to
+         * what each specific section handles.
          */
         public static void handleMovement()
         {
@@ -310,16 +317,18 @@ namespace BasicTracker
             {
                 ConsoleKey key = keyornull.Value;
                 if (key == ConsoleKey.Delete) key = ConsoleKey.Backspace;
-                char oemFixer = ToAscii((Keys)key, Keys.None); //Ha, haha, haaaa... fixes a problem with keyboard manufacturers being awful.
+                char oemFixer = ToAscii((Keys)key, Keys.None); //Ha, haha, haaaa... fixes a problem with keyboard manufacturers being awful. See the comment on the function for more details.
                 if (Console.CursorTop == 5)
                 {
-                    // We're in the ordering, oh no
+                    // We're in the ordering, oh no. We sense this by looking how high the cursor is.
                     if (key == ConsoleKey.RightArrow)
                     {
+                        // Moving fast along the list, to the right
                         if (control)
                         {
                             if (orderPosition >= Driver.orders.Count() - 10)
                             {
+                                // We clamp the movement, so you still move to the end, just not 10.
                                 orderPosition = Driver.orders.Count() - 1;
                                 SetMessage("Cannot go further right along the ordering list");
                             }
@@ -329,6 +338,7 @@ namespace BasicTracker
                                 RefreshScreen();
                             }
                         }
+                        // Moving at normal speed to the right.
                         else
                         {
                             if (orderPosition == Driver.orders.Count() - 1)
@@ -344,6 +354,7 @@ namespace BasicTracker
                     }
                     if (key == ConsoleKey.LeftArrow)
                     {
+                        // Moving fast along the list to the left.
                         if (control)
                         {
                             if (orderPosition <= 9)
@@ -357,6 +368,7 @@ namespace BasicTracker
                                 RefreshScreen();
                             }
                         }
+                        // Moving at normal speed to the left.
                         else
                         {
                             if (orderPosition == 0)
@@ -370,20 +382,25 @@ namespace BasicTracker
                             }
                         }
                     }
+                    // Deleting orders.
                     if (key == ConsoleKey.Backspace)
                     {
+                        // There can never be no orders, or the playback cursor can't be somewhere.
                         if (Driver.orders.Count() == 1)
                         {
                             SetMessage("Cannot delete the last order");
                         }
+                        // If you delete an order whilst it is playing, the playback cursor will jump one to the right. So, you can't delete the last one whilst it is playing.
                         else if (Driver.playbackStarted && currentPattern == Driver.GetPatternCount())
                         {
                             SetMessage("Cannot delete the last order whilst the driver is playing it. Stop the playback first.");
                         }
                         else
                         {
+                            // Control makes it so the pattern is deleted as well.
                             if (control)
                             {
+                                // If we deleted a pattern that is in the ordering more than once we'd end up with dangling pointers.
                                 if (Driver.orders.Where(x => x == Driver.orders[orderPosition]).Count() > 1)
                                 {
                                     SetMessage("Cannot delete pattern that is referenced in the ordering more than once.");
@@ -396,6 +413,7 @@ namespace BasicTracker
                                     {
                                         Driver.RemovePattern(Driver.orders[orderPosition]);
                                         Driver.orders.RemoveAt(orderPosition);
+                                        // If we deleted from under ourselves, move us over.
                                         if (orderPosition >= Driver.orders.Count()) orderPosition--;
                                         if (currentPattern > Driver.GetPatternCount()) currentPattern--;
                                         RefreshScreen();
@@ -410,23 +428,28 @@ namespace BasicTracker
                             }
                         }
                     }
+                    // Switch back to normal mode.
                     if (key == ConsoleKey.F6)
                     {
                         Console.SetCursorPosition(4, 10);
                     }
+                    // Make a new order. Inserts it at the current position
                     if (key == ConsoleKey.N && control)
                     {
                         Driver.orders.Insert(orderPosition, 1);
                         RefreshScreen();
                     }
+                    // Edits the current order value.
                     if (key == ConsoleKey.Enter)
                     {
                         int posx = Console.CursorLeft;
                         int posy = Console.CursorTop;
                         ushort temp = Driver.orders[orderPosition];
+                        // Set the value to the largest value temporarily to try avoiding rendering errors.
                         Driver.orders[orderPosition] = 10000;
                         SetMessage("Changing order at index " + orderPosition.ToString());
                         string input = Console.ReadLine();
+                        // TryParse does most of the error checking for us.
                         if (ushort.TryParse(input, out ushort tryvalue))
                         {
                             if (tryvalue > Driver.GetPatternCount())
@@ -447,10 +470,12 @@ namespace BasicTracker
                         }
                         Console.SetCursorPosition(posx, posy);
                     }
+                    // The spacebar still works whilst in the order mode :)
                     if (key == ConsoleKey.Spacebar)
                     {
                         Driver.TogglePlayback();
                     }
+                    // As does tab.
                     if (key == ConsoleKey.Tab)
                     {
                         for (int i = 0; i < 8; i++)
@@ -459,10 +484,15 @@ namespace BasicTracker
                         }
                     }
                 }
+                // We're not in the ordering.
                 else
                 {
+                    // This is the section for moving the cursor about the screen. It's entirely redone 
+                    // from the console basic one, because you can only move to very certain places.
                     if (key == ConsoleKey.UpArrow && Console.CursorTop >= 11)
                     {
+                        // For some reason the code here just doesn't work; pressing control and
+                        // the up or down arrows does nothing at all. Thanks, Windows.
                         if (Consolex.control && alt && Console.CursorTop >= G.VmoveLarge + 10)
                         {
                             Console.CursorTop -= G.VmoveLarge;
@@ -475,6 +505,7 @@ namespace BasicTracker
                         else
                             Console.CursorTop -= 1;
                     }
+                    // Down arrow
                     else if (key == ConsoleKey.DownArrow && Console.CursorTop <= G.depth + 8)
                     {
                         if (Consolex.control && alt && Console.CursorTop >= G.depth - G.VmoveLarge + 9)
@@ -489,9 +520,11 @@ namespace BasicTracker
                         else
                             Console.CursorTop += 1;
                     }
+                    // Left arrow
                     else if (key == ConsoleKey.LeftArrow && Console.CursorLeft > 4)
                     {
-                        if (Consolex.control && Console.CursorLeft >= G.Hmove)
+                        // If the control key is held we move entire channels at once. If we're at the edge of the screen we ignore this and move normally.
+                        if (Consolex.control && Console.CursorLeft >= G.Hmove+4)
                         {
                             Console.CursorLeft -= G.Hmove;
                         }
@@ -501,9 +534,10 @@ namespace BasicTracker
                             Console.CursorLeft -= 1;
                         }
                     }
+                    // Right arrow
                     else if (key == ConsoleKey.RightArrow && Console.CursorLeft <= G.width + 1)
                     {
-                        if (Consolex.control && Console.CursorLeft <= G.width - G.Hmove)
+                        if (Consolex.control && Console.CursorLeft < G.width - G.Hmove+4)
                         {
                             Console.CursorLeft += G.Hmove;
                         }
@@ -513,10 +547,7 @@ namespace BasicTracker
                             Console.CursorLeft += 1;
                         }
                     }
-                    else if (key == ConsoleKey.LeftArrow || key == ConsoleKey.RightArrow || key == ConsoleKey.UpArrow || key == ConsoleKey.DownArrow)
-                    {
-                        Console.SetCursorPosition(Console.CursorLeft, Console.CursorTop);
-                    }
+                    // These keys require that no modifiers are pressed.
                     if (!(control || shift || alt))
                     {
                         ProcessKey(key);
@@ -683,137 +714,142 @@ namespace BasicTracker
                             Console.SetCursorPosition(31, 5);
                         }
                     }
-                    if (control && key == ConsoleKey.N) //Ctrl+N
+                    // These keys require that only control is pressed.
+                    else if (!(shift || alt) && control)
                     {
-                        if (Driver.GetPatternCount() == 65536)
+                        if (key == ConsoleKey.N) //Ctrl+N
                         {
-                            SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
-                        }
-                        else
-                        {
-                            Driver.NewPattern();
-                            SetMessage("Created a new pattern");
-                        }
-                    }
-                    if (control && key == ConsoleKey.D) //Ctrl+D
-                    {
-                        if (Driver.GetPatternCount() == 65536)
-                        {
-                            SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
-                        }
-                        else
-                        {
-                            int finalPattern = Driver.CopyPattern(currentPattern);
-                            SetMessage("Copied pattern " + currentPattern.ToString() + " to pattern " + finalPattern);
-                        }
-                    }
-                    if (control && key == ConsoleKey.Z) //Ctrl+Z
-                    {
-                        Driver.CopyChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
-                        SetMessage("Copied channel to clipboard");
-                    }
-                    if (control && key == ConsoleKey.X)  //Ctrl+X
-                    {
-                        Driver.PasteChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
-                        SetMessage("Pasted channel from clipboard");
-                    }
-                    if (shift && key == ConsoleKey.Z)  //Shift+Z
-                    {
-                        Driver.RotateChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
-                        SetMessage("Rotated channel");
-                    }
-                    if (control && (oemFixer == '[' | oemFixer == ']'))
-                    {
-                        if (Driver.playbackStarted)
-                        {
-                            SetMessage("Cannot change pattern whilst playback is started");
-                        }
-                        else
-                        {
-                            if (oemFixer == '[') //Ctrl+[
+                            if (Driver.GetPatternCount() == 65536)
                             {
-                                currentPattern--;
-                            }
-                            if (oemFixer == ']') //Ctrl+]
-                            {
-                                currentPattern++;
-                            }
-                            if (currentPattern == 0)
-                            {
-                                currentPattern++;
-                                SetMessage("Cannot go lower than pattern zero");
-                            }
-                            else if (currentPattern > Driver.GetPatternCount())
-                            {
-                                currentPattern--;
-                                SetMessage("Pattern " + (currentPattern + 1).ToString() + " does not exist");
+                                SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
                             }
                             else
                             {
-                                SetMessage("Pattern changed to pattern " + currentPattern.ToString());
+                                Driver.NewPattern();
+                                SetMessage("Created a new pattern");
                             }
-                            Driver.AskForRow(currentPattern);
                         }
-                    }
-                    if (key == ConsoleKey.Backspace && control)
-                    {
-                        if (Driver.GetPatternCount() == 1)
+                        if (key == ConsoleKey.D) //Ctrl+D
                         {
-                            SetMessage("Cannot delete the last pattern");
-                        }
-                        else if (Driver.playbackStarted)
-                        {
-                            SetMessage("Cannot delete a pattern whilst the driver is playing it. Stop the playback first.");
-                        }
-                        else
-                        {
-                            if (Driver.orders.Where(x => x == currentPattern).Count() > 0)
+                            if (Driver.GetPatternCount() == 65536)
                             {
-                                SetMessage("Cannot delete pattern that is referenced in the ordering.");
+                                SetMessage("Cannot add more than 65536 total patterns, calm tf down.");
                             }
                             else
                             {
-                                DialogResult d = MessageBox.Show("Are you SURE you want to delete this pattern?", "Delete pattern",
-                                    MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                int finalPattern = Driver.CopyPattern(currentPattern);
+                                SetMessage("Copied pattern " + currentPattern.ToString() + " to pattern " + finalPattern);
+                            }
+                        }
+                        if (key == ConsoleKey.Z) //Ctrl+Z
+                        {
+                            Driver.CopyChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                            SetMessage("Copied channel to clipboard");
+                        }
+                        if (key == ConsoleKey.X)  //Ctrl+X
+                        {
+                            Driver.PasteChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                            SetMessage("Pasted channel from clipboard");
+                        }
+
+                        if ((oemFixer == '[' | oemFixer == ']'))
+                        {
+                            if (Driver.playbackStarted)
+                            {
+                                SetMessage("Cannot change pattern whilst playback is started");
+                            }
+                            else
+                            {
+                                if (oemFixer == '[') //Ctrl+[
+                                {
+                                    currentPattern--;
+                                }
+                                if (oemFixer == ']') //Ctrl+]
+                                {
+                                    currentPattern++;
+                                }
+                                if (currentPattern == 0)
+                                {
+                                    currentPattern++;
+                                    SetMessage("Cannot go lower than pattern zero");
+                                }
+                                else if (currentPattern > Driver.GetPatternCount())
+                                {
+                                    currentPattern--;
+                                    SetMessage("Pattern " + (currentPattern + 1).ToString() + " does not exist");
+                                }
+                                else
+                                {
+                                    SetMessage("Pattern changed to pattern " + currentPattern.ToString());
+                                }
+                                Driver.AskForRow(currentPattern);
+                            }
+                        }
+                        if (key == ConsoleKey.Backspace && control)
+                        {
+                            if (Driver.GetPatternCount() == 1)
+                            {
+                                SetMessage("Cannot delete the last pattern");
+                            }
+                            else if (Driver.playbackStarted)
+                            {
+                                SetMessage("Cannot delete a pattern whilst the driver is playing it. Stop the playback first.");
+                            }
+                            else
+                            {
+                                if (Driver.orders.Where(x => x == currentPattern).Count() > 0)
+                                {
+                                    SetMessage("Cannot delete pattern that is referenced in the ordering.");
+                                }
+                                else
+                                {
+                                    DialogResult d = MessageBox.Show("Are you SURE you want to delete this pattern?", "Delete pattern",
+                                        MessageBoxButtons.OKCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                                    if (d == DialogResult.OK)
+                                    {
+                                        Driver.RemovePattern(currentPattern);
+                                        if (currentPattern > Driver.GetPatternCount()) currentPattern--;
+                                        RefreshScreen();
+                                    }
+                                }
+                            }
+                            //Console.WriteLine("Key is " + key);
+                        }
+                        if (key == ConsoleKey.O && control)
+                        {
+                            if (Driver.playbackStarted)
+                            {
+                                SetMessage("Cannot open song while playback is started. Stop playing the song first.");
+                            }
+                            else
+                            {
+                                OpenFileDialog f = new OpenFileDialog();
+                                f.Filter = "Basic Tracker Files (*.bsctrk) | *.bsctrk";
+                                f.Title = "Open a Basic Tracker song";
+                                f.AddExtension = true;
+                                f.CheckFileExists = true;
+                                f.CheckPathExists = true;
+                                f.DereferenceLinks = true;
+                                DialogResult d = f.ShowDialog();
                                 if (d == DialogResult.OK)
                                 {
-                                    Driver.RemovePattern(currentPattern);
-                                    if (currentPattern > Driver.GetPatternCount()) currentPattern--;
+                                    currentPattern = 1;
+                                    currentRow = 0;
+                                    orderPosition = 0;
+                                    Driver.LoadFile(f.OpenFile());
                                     RefreshScreen();
                                 }
                             }
                         }
-                        //Console.WriteLine("Key is " + key);
-                    }
-                    if (key == ConsoleKey.O && control)
-                    {
-                        if (Driver.playbackStarted)
+                        if (key == ConsoleKey.S && control)
                         {
-                            SetMessage("Cannot open song while playback is started. Stop playing the song first.");
-                        }
-                        else
-                        {
-                            OpenFileDialog f = new OpenFileDialog();
-                            f.Filter = "Basic Tracker Files (*.bsctrk) | *.bsctrk";
-                            f.Title = "Open a Basic Tracker song";
-                            f.AddExtension = true;
-                            f.CheckFileExists = true;
-                            f.CheckPathExists = true;
-                            f.DereferenceLinks = true;
-                            DialogResult d = f.ShowDialog();
-                            if (d == DialogResult.OK)
-                            {
-                                currentPattern = 1;
-                                currentRow = 0;
-                                orderPosition = 0;
-                                Driver.LoadFile(f.OpenFile());
-                                RefreshScreen();
-                            }
+                            SaveSong();
                         }
                     }
-                    if (key == ConsoleKey.S && control)
+                    else if (shift && key == ConsoleKey.Z && !control && !alt)  //Shift+Z
                     {
-                        SaveSong();
+                        Driver.RotateChannel(currentPattern, (Console.CursorLeft - 3) / G.defaultBar.Length);
+                        SetMessage("Rotated channel");
                     }
                 }
                 if (key == ConsoleKey.F1)
@@ -1284,15 +1320,16 @@ namespace BasicTracker
             {
                 ConsoleKeyInfo keyinfo = Console.ReadKey(true);
                 ConsoleKey key = keyinfo.Key;
-                control = (keyinfo.Modifiers == ConsoleModifiers.Control);
-                shift = (keyinfo.Modifiers == ConsoleModifiers.Shift);
-                alt = (keyinfo.Modifiers == ConsoleModifiers.Alt);
+                control = ((keyinfo.Modifiers & ConsoleModifiers.Control) > 0);
+                shift = ((keyinfo.Modifiers & ConsoleModifiers.Shift) > 0);
+                alt = ((keyinfo.Modifiers & ConsoleModifiers.Alt) > 0);
                 char keychar = keyinfo.KeyChar;
                 lastkey = key;
             }
             else lastkey = null;
         }
 
+        //! Handles things to do with the screen that need to be done every tick that aren't to do with movement.
         public static void handleScreen()
         {
             if (screenTime.ElapsedMilliseconds > 3000)
@@ -1309,6 +1346,13 @@ namespace BasicTracker
             }
         }
 
+        //! Waits for the next tick. 
+        /*! Pauses the entire program until the next tick should happen on the audio driver.
+         * This keeps both the processing and the driver in time and not using all of the CPU
+         * time - it does have the slight side effect that if you set the speed and tick rate
+         * really low the program grinds to a halt and is basically unusable, but just don't
+         * do that.
+         */
         public static void waitOnTick()
         {
             frameTimer.Stop();

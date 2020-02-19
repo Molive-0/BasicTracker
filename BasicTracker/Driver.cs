@@ -445,7 +445,8 @@ namespace BasicTracker
                         }
                     }
                     //handle effects
-                    handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, note.effect);
+                    if (note.effect.type != effectParameter.Type.NONE)
+                        handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, note.effect);
                     AudioSubsystem.SetPitch(channelIndex, chanPitch[channelIndex]);
                     AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 255.0f);
                     AudioSubsystem.SetPreGain(channelIndex, Math.Max(Math.Min(chanPreGain[channelIndex] / 255.0, 1.0), 0.0));
