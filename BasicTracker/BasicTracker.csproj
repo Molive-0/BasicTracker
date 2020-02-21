@@ -41,4 +41,7 @@
       SET ERRORLEVEL=0
     </PostBuildEvent>
   </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="doxygen .\..\Doxyfile&#xD;&#xA;.\..\Docs\latex\Make.bat&#xD;&#xA;" />
+  </Target>
 </Project>

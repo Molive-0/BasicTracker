@@ -13,13 +13,13 @@ using System.IO;
 using Microsoft.Win32.SafeHandles;
 using System.Threading;
 
-[assembly: AssemblyVersion("0.1.*")] //define the auto incrementing build version
+[assembly: AssemblyVersion("0.1.*")] //define the auto incrementing build version.
 
 
 //! The main namespace for Basic Tracker. All code should be in this namespace.
 namespace BasicTracker
 {
-    //! Global constants
+    //! Global constants.
     /*! 
      * The G class includes a pile of constants and readonly values
      * which can be accessed from anywhere in the project. It allows for
@@ -27,13 +27,13 @@ namespace BasicTracker
      */
     public static class G
     {
-        public const int Vmove = 4; //!< Lines that are moved when the up or down arrows are pressed whilst holding ALT
-        public const int VmoveLarge = 8; //!< Lines that are moved when the up or down arrows are pressed whilst holding CTRL ALT
-        public const string defaultBar = "|-_- -- --- ---"; //!< The starting value for each note
-        public const int Hmove = 15; //!<  Lines that are moved when the left or right arrows are pressed whilst holding CTRL. Is defaultBar.Length
-        public const int depth = 32; //!< How many rows are in a pattern
-        public const int channels = 8; //!< How many channels there are, duh
-        public const int width = 15 * 8; //!< defaultBar.Length * channels, the columns needed for the screen
+        public const int Vmove = 4; //!< Lines that are moved when the up or down arrows are pressed whilst holding ALT.
+        public const int VmoveLarge = 8; //!< Lines that are moved when the up or down arrows are pressed whilst holding CTRL ALT.
+        public const string defaultBar = "|-_- -- --- ---"; //!< The starting value for each note.
+        public const int Hmove = 15; //!<  Lines that are moved when the left or right arrows are pressed whilst holding CTRL. Is defaultBar.Length.
+        public const int depth = 32; //!< How many rows are in a pattern.
+        public const int channels = 8; //!< How many channels there are, duh.
+        public const int width = 15 * 8; //!< defaultBar.Length * channels, the columns needed for the screen.
         public static readonly char[] signature = { 'B', 'S', 'C', 'M' }; //!< The four characters at the very start of the file format. Used for file recognition, so that you can quickly see if a file is a Basic Tracker file.
         //! A ridiculous string which contains the starting state of the header for the GUI. It's really long because it if it reaches the end of a line it automatically goes to the next line and so I can't put a new line there. So it's just a really long line. It's a mess really, don't look at it.
         public const string header =
@@ -113,11 +113,11 @@ namespace BasicTracker
             "be very useful.\n" +
             "Thanks!\n" +
             "    ~Molive";
-        public const int MF_BYCOMMAND = 0x00000000; //!< Flags for following commands
-        public const int SC_CLOSE = 0xF060; //!< Code to remove the ability to close the app >:) Unused
-        public const int SC_MINIMIZE = 0xF020; //!< Code to remove the ability to minimize the app. Unused
-        public const int SC_MAXIMIZE = 0xF030; //!< Code to remove the ability to maximise the app
-        public const int SC_SIZE = 0xF000; //!< Code to remove the ability to resize the app
+        public const int MF_BYCOMMAND = 0x00000000; //!< Flags for following commands.
+        public const int SC_CLOSE = 0xF060; //!< Code to remove the ability to close the app >:)
+        public const int SC_MINIMIZE = 0xF020; //!< Code to remove the ability to minimize the app. Unused.
+        public const int SC_MAXIMIZE = 0xF030; //!< Code to remove the ability to maximise the app.
+        public const int SC_SIZE = 0xF000; //!< Code to remove the ability to resize the app.
 
 
     }
@@ -126,8 +126,8 @@ namespace BasicTracker
      */
     class Program
     {
-        //! The main function
-        /*! Contains the main loop for the program. It's inside a "while not escape" so if you press escape the program should just exit
+        //! The main function.
+        /*! Contains the main loop for the program. It's inside a "while not escape" so if you press escape the program should just exit.
          *  
          *  @param args Command line arguments
          */
@@ -162,6 +162,7 @@ namespace BasicTracker
             AudioSubsystem.Shutdown();
             Console.Clear();
         }
+        //! Function called on program exit.
         static void closing(object sender, ConsoleCancelEventArgs e)
         {
             DialogResult d = MessageBox.Show("Do you wish to save your work before quitting?", "Quit", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
@@ -194,9 +195,9 @@ namespace BasicTracker
         public static bool alt { get; private set; } //!< Cached bool for if the Alt key is pressed. The setter is private.
         private static ConsoleKey? lastkey; //!< Cached value for last key pressed. It's private, but there's a public GetKey that returns it.
 
-        private static int octave; //!< The current octave for inputting notes. It's also shown in the GUI
-        private static int currentPattern; //!< The current pattern shown on screen
-        private static int instrument; //!< The current instrument for inputting notes. It's also shown in the GUI
+        private static int octave; //!< The current octave for inputting notes. It's also shown in the GUI.
+        private static int currentPattern; //!< The current pattern shown on screen.
+        private static int instrument; //!< The current instrument for inputting notes. It's also shown in the GUI.
         private static int orderPosition; //!< How far scrolled over the order row is. It's also shown at the left of the bar.
         private static int currentRow; //!< Where the playback cursor is, used for rendering it to the screen.
         private static string screenMessage; //!< Thee messagee used for the message bar.
@@ -205,7 +206,7 @@ namespace BasicTracker
 
         private static bool helpOpen = false; //!< Is the help window open? Used so that it doesn't open twice.
 
-        //! Empty static console constructor
+        //! Empty static console constructor.
         /*! init run automatically before anything else.
          * Contains code to set up the screen for the first time, such as resising
          * and removing the ability to maximise. It also writes out the default 
@@ -295,17 +296,17 @@ namespace BasicTracker
                                           byte[] lpKeyState,
                                           [Out] StringBuilder lpChar,
                                           uint uFlags);
-        //! For removing abilities
+        //! For removing abilities.
         [DllImport("user32.dll")]
         public static extern int DeleteMenu(IntPtr hMenu, int nPosition, int wFlags);
-        //! For getting handles
+        //! For getting handles.
         [DllImport("user32.dll")]
         private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
-        //! For getting handles
+        //! For getting handles.
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetConsoleWindow();
 
-        //! Handles the cursor movement
+        //! Handles the cursor movement.
         /*! This handles basically everything in terms of keyboard input from the user. It's not a switch case because a lot of the
          * tests require multiple checks for things likee modifiers or other scenarios. There's extra comments in the code as to
          * what each specific section handles.
@@ -550,8 +551,9 @@ namespace BasicTracker
                     // These keys require that no modifiers are pressed.
                     if (!(control || shift || alt))
                     {
+                        // for inputting actual notes.
                         ProcessKey(key);
-
+                        // Fixes the cursor after the notes are input.
                         if (Console.CursorLeft == G.width + 3)
                         {
                             Console.CursorLeft -= 1;
