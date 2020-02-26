@@ -1036,8 +1036,8 @@ namespace BasicTracker
             internal void saveToFile(BinaryWriter bw)
             {
                 bw.Write(G.signature);
-                bw.Write(songname.PadRight(30, '\0').ToCharArray());
-                bw.Write(authorname.PadRight(30, '\0').ToCharArray());
+                bw.Write(songname.PadRight(30, '_').ToCharArray());
+                bw.Write(authorname.PadRight(30, '_').ToCharArray());
                 bw.Write((ushort)orders.Count());
                 bw.Write((ushort)patterns.Count());
                 uint[] patternPtr = new uint[patterns.Count()];
@@ -1430,7 +1430,7 @@ namespace BasicTracker
             public Note()
             {
                 octave = 4;
-                note = N.EMPTY;
+                internal_note = (byte)N.EMPTY;
                 instrument = 0;
                 volume = new volumeParameter() { type = volumeParameter.Type.N, value = 255 };
                 effect = new effectParameter() { type = effectParameter.Type.NONE, value = 0 };
