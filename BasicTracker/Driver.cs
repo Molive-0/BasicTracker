@@ -158,18 +158,26 @@ namespace BasicTracker
             {
                 waveformTables[0, i] = Math.Sin((i / 128.0) * Math.PI) / 8.0;
             }
-            for (int i = 0; i < 256; i++)
+            for (int i = 0; i < 255; i++)
             {
-                waveformTables[1, i] = (i / 256.0) * 0.125;
+                //waveformTables[1, i] = (i / 256.0) * 0.125;
+                waveformTables[1, i] = 0.125;
             }
-            for (int i = 0; i < 256; i++)
+            waveformTables[1, 255] = -32;
+            for (int i = 0; i < 255; i++)
             {
-                waveformTables[2, i] = i < 128 ? 0.125 : 0;
+                waveformTables[2, i] = 0;
             }
+            waveformTables[2, 128] = 32;
+            waveformTables[2, 255] = -32;
             Random r = new Random();
+            double prevrand = 0;
+            double newrand;
             for (int i = 0; i < 256; i++)
             {
-                waveformTables[3, i] = r.NextDouble() / 8.0;
+                newrand = (r.NextDouble() / 8.0) - 4.0;
+                waveformTables[3, i] = newrand - prevrand;
+                prevrand = newrand;
             }
         }
         public static void test()
@@ -628,6 +636,8 @@ namespace BasicTracker
                     waveformTablePointer[channelIndex] += (value & 0xf0) >> 2;
                     waveformTablePointer[channelIndex] %= 256;
                     chanPan[channelIndex] += (waveformTables[panbrelloWaveform[channelIndex], waveformTablePointer[channelIndex]] * (value & 0xF) * 8.0);
+                    if (chanPan[channelIndex] > 255) chanPan[channelIndex] = 255;
+                    if (chanPan[channelIndex] < 0) chanPan[channelIndex] = 0;
                     break;
                 case effectParameter.Type.I:
                     value = findPrevious(effect, channel, channelIndex, row);
@@ -703,6 +713,11 @@ namespace BasicTracker
                 case effectParameter.Type.Q:
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
+                    if ((value & 0xf) == 0)
+                    {
+                        Consolex.SetMessage(effectBad(row, channelIndex) + "\"y\" cannot be zero");
+                        break;
+                    }
                     if (tickCounter % (value & 0xf) == 0)
                     {
                         AudioSubsystem.Start(channelIndex);
@@ -767,12 +782,27 @@ namespace BasicTracker
                             Consolex.SetMessage(effectBad(row, channelIndex) + "This is not an Amiga");
                             break;
                         case 3:
+                            if ((effect.value & 0xf) > 3)
+                            {
+                                Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
+                                break;
+                            }
                             vibratoWaveform[channelIndex] = (effect.value & 0xf);
                             break;
                         case 4:
+                            if ((effect.value & 0xf) > 3)
+                            {
+                                Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
+                                break;
+                            }
                             tremoloWaveform[channelIndex] = (effect.value & 0xf);
                             break;
                         case 5:
+                            if ((effect.value & 0xf) > 3)
+                            {
+                                Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
+                                break;
+                            }
                             panbrelloWaveform[channelIndex] = (effect.value & 0xf);
                             break;
                         case 6:

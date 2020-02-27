@@ -29,19 +29,7 @@
   <ItemGroup Condition="'$(Mode)' == 'CoreRT'">
     <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
   </ItemGroup>
-  <PropertyGroup Condition="'$(ConfigurationName)' == 'Release With Docs'">
-    <PostBuildEvent>
-      if "$(Platform)" == "Any CPU" (
-      doxygen ..\..\..\Doxyfile
-      ..\..\..\Docs\latex\make.bat
-      ) else (
-      doxygen ..\..\..\..\Doxyfile
-      ..\..\..\..\Docs\latex\make.bat
-      )
-      SET ERRORLEVEL=0
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="doxygen .\..\Doxyfile&#xD;&#xA;.\..\Docs\latex\Make.bat&#xD;&#xA;" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(ConfigurationName)' == 'Release With Docs'">
+    <Exec Command="if &quot;$(ConfigurationName)&quot; == &quot;Release With Docs&quot; ( doxygen .\..\Doxyfile )&#xD;&#xA;if &quot;$(ConfigurationName)&quot; == &quot;Release With Docs&quot; (  .\..\Docs\latex\make.bat )" />
   </Target>
 </Project>
