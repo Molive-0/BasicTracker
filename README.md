@@ -191,10 +191,10 @@ Some issues with _volume being saved correctly_ to disk means that everything th
 Apart from all those errors, it’s _perfectly fine_!
 
 ## Compliation
-Compiles using Visual Studio 2019 on Windows. Requires .NET Core 3.1.100.
-Uses Naudio and Netwtonsoft's Json as Nuget Dependancies.
-Install doxygen and miktex for doc complation.
-Use publish to compile to a single, large exe file.
+Compiles using Visual Studio 2019 on Windows. Requires .NET Core 3.1.100.  
+Uses Naudio and Netwtonsoft's Json as Nuget Dependancies.  
+Install doxygen and miktex for doc complation.  
+Use publish to compile to a single, large exe file.  
 
 ## Future features
  * Volume effects
@@ -206,7 +206,7 @@ Use publish to compile to a single, large exe file.
 
 ## Final words
 
-I'd appreciate feedback! You can reach me by email at moliveofscratch@gmail.com. I need people to give advice on how to make this program better for the A-Level write-up so it'd be very useful.  
+I'd appreciate feedback! You can reach me by email at [moliveofscratch@gmail.com](mailto:moliveofscratch+basictracker@("from%20basictracker%20readme")gmail.com). I need people to give advice on how to make this program better for the A-Level write-up so it'd be very useful.  
 Thanks!  
     ~Molive
 
