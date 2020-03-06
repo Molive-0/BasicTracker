@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <Import Condition=" '$(EAZFUSCATOR_NET_HOME)' != '' and Exists('$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets') " Project="$(EAZFUSCATOR_NET_HOME)\Integration\MSBuild\Eazfuscator.NET.targets" />
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
@@ -7,6 +8,10 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Platforms>AnyCPU;x64</Platforms>
     <!--<IlcOptimizationPreference>Speed</IlcOptimizationPreference>-->
+    <!-- Eazfuscator.NET is integrated with this project at MSBuild level: https://www.gapotchenko.com/eazfuscator.net/kb/100036 -->
+    <EazfuscatorIntegration>MSBuild</EazfuscatorIntegration>
+    <EazfuscatorActiveConfiguration>Release</EazfuscatorActiveConfiguration>
+    <EazfuscatorCompatibilityVersion>2019.4</EazfuscatorCompatibilityVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Mode)' != 'CoreRT'">
     <PublishSingleFile>true</PublishSingleFile>

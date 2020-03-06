@@ -6,12 +6,18 @@ using System.Windows.Forms;
 
 namespace BasicTracker
 {
+    //! Contains a software mockup of the sound hardware of an old computer.
     static public class AudioSubsystem
     {
-        static AsioOut asio;
-        static WasapiOut wasapi;
-        static TrackerGenerator t;
+        static AsioOut asio; //!< The ASIO out device
+        static WasapiOut wasapi; //!< The WasAPI out device
+        static TrackerGenerator t; //!< The actual synth.
 
+        //! Init the Audio subsystem
+        /* This init handles the very first section of the program, where it asks for a driver to use.
+         * It allows you to pick because before I had it choose itself and nothing worked. The first
+         * screen doesn't really fit with the rest of the project but oh well.
+         */
         static public void init()
         {
             t = new TrackerGenerator();
@@ -62,6 +68,7 @@ namespace BasicTracker
                 wasapi.Play();
             }
         }
+        //! This is the only place in the project with a destructor. It handles closing the 
         static public void Shutdown()
         {
             if (asio != null)
@@ -75,26 +82,35 @@ namespace BasicTracker
                 wasapi.Dispose();
             }
         }
-
+        //!< Alias for the TrackerGenerator
         public static void SetPostGain(int channel, double left, double right) { t.SetPostGain(channel, left, right); }
+        //!< Alias for the TrackerGenerator
         public static void SetPreGain(int channel, double value) { t.SetPreGain(channel, value); }
+        //!< Alias for the TrackerGenerator
         public static void SetFM(int channel, bool value) { t.SetFM(channel, value); }
+        //!< Alias for the TrackerGenerator
         public static void SetInstrument(int channel, int value) { t.SetInstrument(channel, value); }
+        //!< Alias for the TrackerGenerator
         public static void SetPitch(int channel, double value) { t.SetPitch(channel, value); }
+        //!< Alias for the TrackerGenerator
         public static void SetPan(int channel, double value) { t.SetPan(channel, value); }
+        //!< Alias for the TrackerGenerator
         public static void SetMasterGain(double value) { t.SetMasterGain(value); }
+        //!< Alias for the TrackerGenerator
         public static void Start(int channel) { t.Start(channel); }
+        //!< Alias for the TrackerGenerator
         public static void Stop(int channel) { t.Stop(channel); }
 
+        //! An Naudio sample provider that runs the audio backend.
         private class TrackerGenerator : ISampleProvider
         {
-            // Wave format
+            //! Wave format
             private readonly WaveFormat waveFormat;
 
-            // Generator variable
+            //! Position through audio stream
             private long nSample;
 
-            private ChannelGenerator[] channels;
+            private ChannelGenerator[] channels; //!< each of the channel audio
             private bool[] echoEnable;
             private bool[] surround;
             private double[] FIR;
@@ -103,12 +119,12 @@ namespace BasicTracker
             private int echoLength; //!< 256 + echolength*64 bytes of buffer
 
             private float[] echo;
-            private MixingSampleProvider masterMix;
-            private VolumeSampleProvider masterGain;
+            private MixingSampleProvider masterMix; //!< Mix the channels down
+            private VolumeSampleProvider masterGain; //!< Final volume control
             private MixingSampleProvider echoMix;
-            private BufferedSampleProvider[] channelBuffers;
-            private PanningSampleProvider[] panners;
-            private SurroundSampleProvider[] gainers;
+            private BufferedSampleProvider[] channelBuffers; //!< Allows the code to put the channels into something more useful
+            private PanningSampleProvider[] panners; //!< panning stage
+            private SurroundSampleProvider[] gainers; //!< PreGain + surround
 
             public void SetPostGain(int channel, double valueLeft, double valueRight) { gainers[channel].VolumeLeft = (float)valueLeft; gainers[channel].VolumeRight = (float)valueRight; }
             public void SetPreGain(int channel, double value) => channels[channel].SetGain(value);
@@ -120,25 +136,25 @@ namespace BasicTracker
             public void Start(int channel) => channels[channel].Start();
             public void Stop(int channel) => channels[channel].Stop();
 
-            /// <summary>
-            /// Initializes a new instance for the Generator (Default :: 32Khz, 2 channels)
-            /// </summary>
+            //! Initializes a new instance for the Generator (Default :: 32Khz, 2 channels)
             public TrackerGenerator()
                 : this(32000, 2)
             {
 
             }
+
+            //! Initializes a new instance for the Generator using a WaveFormat
             public TrackerGenerator(WaveFormat f)
                 : this(f.SampleRate, f.Channels)
             {
 
             }
 
-            /// <summary>
-            /// Initializes a new instance for the Generator (UserDef SampleRate &amp; Channels)
-            /// </summary>
-            /// <param name="sampleRate">Desired sample rate</param>
-            /// <param name="channel">Number of channels</param>
+            //! Initializes a new instance for the Generator 
+            /*
+             @param sampleRateDesired sample rate
+             @param channelNumber of channels
+             */
             public TrackerGenerator(int sampleRate, int channel)
             {
                 waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);

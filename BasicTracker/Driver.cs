@@ -8,38 +8,40 @@ using Newtonsoft.Json;
 
 namespace BasicTracker
 {
+    //! Interprets the song and converts it into midi style commands sent to the audio subsystem.
     static public class Driver
     {
-        static Song song;
-        static int order;
-        static int row;
-        static int PlayRows;
-        static int tickCounter;
-        private static Channel clipboardChannel = new Channel();
+        static Song song; //!< The song itself
+        static int order; //!< Which order of the ordering list we are looking at
+        static int row; //!< Which row we are looking at
+        static int PlayRows; //!< How many rows to play (-1 for infinite)
+        static int tickCounter; //!< How many ticks have elapsed on this row
+        private static Channel clipboardChannel = new Channel(); //!< The clipboard for the channel copypaste
 
-        static double[] chanPreGain = new double[] { 255, 255, 255, 255, 255, 255, 255, 255 };
-        static double[] chanPostGain = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
-        static double[] chanPitch = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 };
-        static double[] chanPan = new double[] { 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f };
-        static double masterGain = 255;
-        static bool[] surround = new bool[8];
+        static double[] chanPreGain = new double[] { 255, 255, 255, 255, 255, 255, 255, 255 }; //!< The pre gain for each channel, before the FM
+        static double[] chanPostGain = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 }; //!< The post gain for each channel, after the FM
+        static double[] chanPitch = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 }; //!< The pitch for each channel in hertz
+        static double[] chanPan = new double[] { 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f }; //!< The panning for each channel
+        static double masterGain = 255; //!< master gain level, between 0 and 255
+        static bool[] surround = new bool[8]; //!< Is this channel playing in surround sound?
 
-        private static byte[] previousEffects = new byte[26];
-        private static double[] previousNote = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 };
-        private static double[] previousVolume = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 };
-        public static bool playbackStarted = false;
+        private static byte[] previousEffects = new byte[26]; //!< The previous parameters for each effect, used for when the param is 00
+        private static double[] previousNote = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 }; //!< The previous note, used for gliding and note pitch effects
+        private static double[] previousVolume = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 }; //!< The previous volume, used for note volume sliding and effects
+        public static bool playbackStarted = false; //!< Is the song currently playing? used to inform the console if it can do certain things without breaking other things
 
-        private static int[] waveformTablePointer = new int[8];
-        private static int[] vibratoWaveform = new int[8];
-        private static int[] tremoloWaveform = new int[8];
-        private static int[] panbrelloWaveform = new int[8];
-        private static int nonResetTickCounter;
+        private static int[] waveformTablePointer = new int[8]; //!< How far through the waveform the channel currently is.
+        private static int[] vibratoWaveform = new int[8]; //!< Which waveform is used for vibrato
+        private static int[] tremoloWaveform = new int[8]; //!< Which waveform is used for tremolo
+        private static int[] panbrelloWaveform = new int[8]; //!< Which waveform is used for panbrello
+        private static int nonResetTickCounter; //!< A tick counter that isn't reset at the end of a row, instead reset at certain effects
 
-        private static int patternLoop;
-        private static int loopPoint;
-        private static int rowLoop;
+        private static int patternLoop; //!< How many loops of a pattern are still to be performed
+        private static int loopPoint; //!< Where the loop point is
+        private static int rowLoop; //!< How many loops of a row are still to be performed
 
-        private static double[,] waveformTables = new double[4, 256];
+        private static double[,] waveformTables = new double[4, 256]; //!< The waveforms used in effects
+        //! A huge table of hertz for each note, tuned to A=440
         static readonly double[] pitches =
         {
         16.35,
@@ -151,26 +153,29 @@ namespace BasicTracker
         7458.62,
         7902.13,
         };
+        //! manually called init function so that it is run at a specific point
         public static void init()
         {
+            //! Create a new song
             song = new Song();
-            for (int i = 0; i < 256; i++)
+            //! Fill the waveform tables. This only works for the sine wave, as ths table technically needs to be the wave that's the differentiation of the output wave.
+            for (int i = 0; i < 256; i++) //!< Sine
             {
                 waveformTables[0, i] = Math.Sin((i / 128.0) * Math.PI) / 8.0;
             }
-            for (int i = 0; i < 255; i++)
+            for (int i = 0; i < 255; i++) //!< Saw
             {
                 //waveformTables[1, i] = (i / 256.0) * 0.125;
                 waveformTables[1, i] = 0.125;
             }
             waveformTables[1, 255] = -32;
-            for (int i = 0; i < 255; i++)
+            for (int i = 0; i < 255; i++) //!< Square
             {
                 waveformTables[2, i] = 0;
             }
             waveformTables[2, 128] = 32;
             waveformTables[2, 255] = -32;
-            Random r = new Random();
+            Random r = new Random(); //!< Noise
             double prevrand = 0;
             double newrand;
             for (int i = 0; i < 256; i++)
@@ -180,11 +185,7 @@ namespace BasicTracker
                 prevrand = newrand;
             }
         }
-        public static void test()
-        {
-            Console.WriteLine("test");
-        }
-
+        //! Called by the console to set the note to a specific value
         public static void ChangeNoteAt(int pattern, int channel, int row, byte note)
         {
             if (note < pitches.Length)
@@ -195,15 +196,18 @@ namespace BasicTracker
                 //AudioSubsystem.Start(channel);
             }
         }
+        //! Called by the console to clear the note to the empty value
         public static void ClearNoteAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].internal_note = (byte)Note.N.EMPTY;
         }
+        //! Places an end note.
         public static void EndNoteAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].internal_note = (byte)Note.N.END;
             //AudioSubsystem.Stop(channel);
         }
+        //! Changes the octave
         public static void ChangeOctaveAt(int pattern, int channel, int row, int octave)
         {
             Note note = song.patterns[pattern - 1].channels[channel].notes[row];
@@ -212,6 +216,7 @@ namespace BasicTracker
                 note.internal_note = (byte)((int)note.note + (12 * octave));
             }
         }
+        //! Changes the volume
         public static void ChangeVolumeAt(int pattern, int channel, int row, bool upper, byte value)
         {
             if (upper)
@@ -225,14 +230,17 @@ namespace BasicTracker
                 song.patterns[pattern - 1].channels[channel].notes[row].volume.value |= value;
             }
         }
+        //! Clears the volume
         public static void ClearVolumeAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].volume.type = volumeParameter.Type.N;
         }
+        //! Sets the volume
         public static void SetVolumeAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].volume.type = volumeParameter.Type.V;
         }
+        //! Sets the parameter for effects, with different options for the high and low nibbles
         public static void ChangeEffectParamAt(int pattern, int channel, int row, bool upper, byte value)
         {
             if (upper)
@@ -246,6 +254,7 @@ namespace BasicTracker
                 song.patterns[pattern - 1].channels[channel].notes[row].effect.value |= value;
             }
         }
+        //! Sets the parameter for effects, with different options for the high and low nibbles
         public static void ChangeInstrumentAt(int pattern, int channel, int row, bool upper, byte value)
         {
             if (upper)
@@ -260,63 +269,72 @@ namespace BasicTracker
                 song.patterns[pattern - 1].channels[channel].notes[row].instrument |= value;
             }
         }
+        //! Sets the effect name
         public static void ChangeEffectTypeAt(int pattern, int channel, int row, char effect)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].effect.type = (effectParameter.Type)(effect - 'A' + 1);
         }
+        //! Removes an effect
         public static void ClearEffectAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].effect.type = effectParameter.Type.NONE;
         }
+        //! Adds a new pattern to the pattern list
         public static void NewPattern()
         {
             song.patterns.Add(new Pattern());
         }
+        //! return the number of patterns in the pattern list
         public static int GetPatternCount()
         {
             return song.patterns.Count();
         }
-
+        
+        //! Alias for the song's name
         public static string Songname
         {
             set { song.songname = value; }
             get { return song.songname; }
         }
+        //! Alias for the song's author
         public static string Author
         {
             set { song.authorname = value; }
             get { return song.authorname; }
         }
+        //! Alias for the song's speed
         public static byte Speed
         {
             set { song.speed = value; }
             get { return song.speed; }
         }
+        //! Alias for the song's tempo
         public static byte Tempo
         {
             set { song.tempo = value; }
             get { return song.tempo; }
         }
+        //! Alias for the song's order list
         public static List<ushort> orders
         {
             set { song.orders = value; }
             get { return song.orders; }
         }
 
-
+        //! Part of the screen rendering code which turns the internal representation of a pattern into an array of lines that can be later printed to the screen.
         public static string[] GetPatternAsString(int pattern)
         {
             Pattern pat = song.patterns[pattern - 1];
             string[] output = new string[32];
-            for (int i = 0; i < 32; i++)
+            for (int i = 0; i < 32; i++) // For each row
             {
                 string channelTemp = "";
-                for (int x = 0; x < 8; x++)
+                for (int x = 0; x < 8; x++) // For each channel
                 {
                     Channel chan = pat.channels[x];
                     Note note = chan.notes[i];
                     string noteTemp = "|";
-                    if (note.note == Note.N.END)
+                    if (note.note == Note.N.END) // Is the note an end or empty?
                     {
                         noteTemp = noteTemp.Insert(1, "=== --");
                     }
@@ -324,7 +342,7 @@ namespace BasicTracker
                     {
                         noteTemp += "-_- --";
                     }
-                    else
+                    else // must contain a note
                     {
                         noteTemp += note.note.ToString() + note.octave // encode the note
                             + " " + note.instrument.ToString("X2"); // encode the instrument
@@ -351,7 +369,7 @@ namespace BasicTracker
             }
             return output;
         }
-
+        //! Will turn the playback on or off
         internal static void TogglePlayback()
         {
             if (PlayRows > 0 | PlayRows == -1)
@@ -369,7 +387,7 @@ namespace BasicTracker
                 Consolex.patternTo(orders[order]);
             }
         }
-
+        //! Reset playback variable so that each playback is the same
         private static void resetVariables()
         {
             Array.Fill(chanPreGain, 255);
@@ -391,6 +409,7 @@ namespace BasicTracker
             nonResetTickCounter = 0;
         }
 
+        //! Executes one line. Is called when equals is pressed.
         internal static void RunOneLine(int v, ushort pattern)
         {
             row = v;
@@ -410,6 +429,7 @@ namespace BasicTracker
                 }
             }
         }
+        //! Executes one row. Is called in a loop to make the song playback.
         internal static void ExecuteRow()
         {
             if (PlayRows > 0 | PlayRows == -1)
@@ -423,20 +443,21 @@ namespace BasicTracker
                     Channel channel = song.patterns[orders[order] - 1].channels[channelIndex];
                     Note note = channel.notes[row];
 
-                    if (note.effect.type == effectParameter.Type.S && ((note.effect.value & 0xF0) == 0x40) && (tickCounter == (note.effect.value & 0xF))  //If the effect is S4x and the delay is reached
+                    if (note.effect.type == effectParameter.Type.S && 
+                        ((note.effect.value & 0xF0) == 0x40) && (tickCounter == (note.effect.value & 0xF))  //If the effect is S4x and the delay is reached
                         || ((rowLoop == 0) //If the effect is SEx and the delay has just started
                         && (tickCounter == 0))) //Or it's just the start of a row
                     {
-                        if (note.note != Note.N.EMPTY)
+                        if (note.note != Note.N.EMPTY) // If no note don't do anything
                         {
-                            if (note.note == Note.N.END)
+                            if (note.note == Note.N.END) // Stop note
                             {
                                 AudioSubsystem.Stop(channelIndex);
                             }
                             else
                             {
 
-                                if (note.effect.type != effectParameter.Type.G)
+                                if (note.effect.type != effectParameter.Type.G) // G causes the note to slide, so don't immediately set it
                                 {
                                     chanPitch[channelIndex] = pitches[note.internal_note];
                                 }
@@ -444,7 +465,7 @@ namespace BasicTracker
                                 AudioSubsystem.Start(channelIndex);
                             }
                         }
-                        if (note.volume.type != volumeParameter.Type.N)
+                        if (note.volume.type != volumeParameter.Type.N) // If no volume don't do anything
                         {
                             if (note.volume.type == volumeParameter.Type.V)
                             {
@@ -455,18 +476,20 @@ namespace BasicTracker
                     //handle effects
                     if (note.effect.type != effectParameter.Type.NONE)
                         handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, note.effect);
+                    //Update the audio subsystem
                     AudioSubsystem.SetPitch(channelIndex, chanPitch[channelIndex]);
                     AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 255.0f);
                     AudioSubsystem.SetPreGain(channelIndex, Math.Max(Math.Min(chanPreGain[channelIndex] / 255.0, 1.0), 0.0));
                     AudioSubsystem.SetPostGain(channelIndex, chanPostGain[channelIndex], chanPostGain[channelIndex] * (surround[channelIndex] ? -1 : 1));
                 }
-                if (masterGain > 255)
+                if (masterGain > 255) // clamp the volume
                 {
                     masterGain = 255;
                 }
                 else if (masterGain < 0) masterGain = 0;
                 AudioSubsystem.SetMasterGain(masterGain / 255.0);
-                if (tickCounter == Speed+extension)
+
+                if (tickCounter == Speed+extension) // Make the tickcounter work
                 {
                     tickCounter = 0;
                 }
@@ -477,13 +500,13 @@ namespace BasicTracker
                     {
                         PlayRows--;
                     }
-                    if (PlayRows != 0 && rowLoop == 0)
+                    if (PlayRows != 0 && rowLoop == 0) // Go to next row
                     {
                         row++;
                         Consolex.rowTo(row);
                     }
                 }
-                if (row == 32)
+                if (row == 32) // Go to next pattern
                 {
                     row = 0;
                     order++;
@@ -495,21 +518,21 @@ namespace BasicTracker
                     Consolex.patternTo(orders[order]);
                 }
             }
-            else
+            else // We didn't do anything
             {
                 playbackStarted = false;
             }
         }
-
+        //! Do all the code for the effects
         private static void handleEffects(ref bool jumped, ref bool looped, ref int extension, int channelIndex, Channel channel, Note note, effectParameter effect)
         {
             int value;
-            switch (effect.type)
+            switch (effect.type) // Main effect switch
             {
-                case effectParameter.Type.A:
+                case effectParameter.Type.A: //Axx set speed
                     Speed = effect.value;
                     break;
-                case effectParameter.Type.B:
+                case effectParameter.Type.B: //Bxx set pattern
                     if (!jumped)
                     {
                         row = 0;
@@ -534,7 +557,7 @@ namespace BasicTracker
                         Consolex.SetMessage(effectBad(row, channelIndex) + "Order does not exist");
                     }
                     break;
-                case effectParameter.Type.C:
+                case effectParameter.Type.C: // Set the row.
                     if (!jumped)
                     {
                         order++;
@@ -555,12 +578,12 @@ namespace BasicTracker
                         Consolex.SetMessage(effectBad(row, channelIndex) + " Cxx Row is too high, must be less than 32");
                     }
                     break;
-                case effectParameter.Type.D:
+                case effectParameter.Type.D: // Change the volume
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     affectVolume(ref chanPreGain[channelIndex], value, channelIndex);
                     break;
-                case effectParameter.Type.E:
+                case effectParameter.Type.E: //Pitch slides
                 case effectParameter.Type.F:
                 case effectParameter.Type.G:
                     value = findPrevious(effect, channel, channelIndex, row);
@@ -614,7 +637,7 @@ namespace BasicTracker
                         }
                     }
                     break;
-                case effectParameter.Type.H:
+                case effectParameter.Type.H: // Vibrato things.
                 case effectParameter.Type.U:
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
@@ -623,14 +646,14 @@ namespace BasicTracker
                     chanPitch[channelIndex] *= 1 + (waveformTables[vibratoWaveform[channelIndex], waveformTablePointer[channelIndex]] * (value & 0xF) / 
                         (effect.type == effectParameter.Type.H ? 8.0 : 32.0));
                     break;
-                case effectParameter.Type.R:
+                case effectParameter.Type.R: // Tremolo things.
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     waveformTablePointer[channelIndex] += (value & 0xf0) >> 2;
                     waveformTablePointer[channelIndex] %= 256;
                     chanPreGain[channelIndex] += (waveformTables[tremoloWaveform[channelIndex], waveformTablePointer[channelIndex]] * (value & 0xF) * 16.0);
                     break;
-                case effectParameter.Type.Y:
+                case effectParameter.Type.Y: //Panbrello things.
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     waveformTablePointer[channelIndex] += (value & 0xf0) >> 2;
@@ -639,7 +662,7 @@ namespace BasicTracker
                     if (chanPan[channelIndex] > 255) chanPan[channelIndex] = 255;
                     if (chanPan[channelIndex] < 0) chanPan[channelIndex] = 0;
                     break;
-                case effectParameter.Type.I:
+                case effectParameter.Type.I: //Tremor
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     if (tickCounter == 0 && note.volume.type == volumeParameter.Type.V)
@@ -649,7 +672,7 @@ namespace BasicTracker
                     int upper = (value & 0xf0) >> 4;
                     chanPreGain[channelIndex] = nonResetTickCounter++ % (upper + (value & 0xf)) < upper - 1 ? previousVolume[channelIndex] : 0; //!< Out of all of the cycle of the tremor we could be currently on, if it's in the first half have it on otherwise kill the volume.
                     break;
-                case effectParameter.Type.J:
+                case effectParameter.Type.J: //Arpeggio
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     if ((note.note != Note.N.EMPTY) && (note.note != Note.N.END))
@@ -673,7 +696,7 @@ namespace BasicTracker
                             break;
                     }
                     break;
-                case effectParameter.Type.K:
+                case effectParameter.Type.K: //Volume slide and vibrato
                     handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
                     {
                         type = effectParameter.Type.D,
@@ -685,7 +708,7 @@ namespace BasicTracker
                         value = 0
                     });
                     break;
-                case effectParameter.Type.L:
+                case effectParameter.Type.L: //Volume slide and glide
                     handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, new effectParameter
                     {
                         type = effectParameter.Type.D,
@@ -697,20 +720,20 @@ namespace BasicTracker
                         value = 0
                     });
                     break;
-                case effectParameter.Type.M:
+                case effectParameter.Type.M: //Channel volume
                     chanPostGain[channelIndex] = effect.value;
                     break;
-                case effectParameter.Type.N:
+                case effectParameter.Type.N: //Channel volue slide
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     affectVolume(ref chanPostGain[channelIndex], value, channelIndex);
                     break;
-                case effectParameter.Type.P:
+                case effectParameter.Type.P: //Panning slide
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     affectVolume(ref chanPan[channelIndex], value, channelIndex);
                     break;
-                case effectParameter.Type.Q:
+                case effectParameter.Type.Q: //Retrigger
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     if ((value & 0xf) == 0)
@@ -740,7 +763,7 @@ namespace BasicTracker
                         }
                     }
                     break;
-                case effectParameter.Type.T:
+                case effectParameter.Type.T: //Tempo setting
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     if (value < 0x10)
@@ -755,33 +778,33 @@ namespace BasicTracker
                         Tempo = (byte)value;
                     }
                     break;
-                case effectParameter.Type.V:
+                case effectParameter.Type.V: //Global volume
                     masterGain = effect.value;
                     break;
-                case effectParameter.Type.W:
+                case effectParameter.Type.W: //Global volume slide
                     value = findPrevious(effect, channel, channelIndex, row);
                     if (value == -1) break;
                     affectVolume(ref masterGain, value, channelIndex);
                     break;
-                case effectParameter.Type.X:
+                case effectParameter.Type.X: //Panning
                     chanPan[channelIndex] = effect.value;
                     break;
                 default:
                     Consolex.SetMessage(effectBad(row, channelIndex) + "Unknown effect");
                     break;
-                case effectParameter.Type.S:
+                case effectParameter.Type.S: //Special
                     switch ((effect.value & 0xf0) >> 4)
                     {
-                        case 0:
+                        case 0: //nothing
                             Consolex.SetMessage(effectBad(row, channelIndex) + "S0x does nothing");
                             break;
-                        case 1:
+                        case 1: //unimplemented
                             Consolex.SetMessage(effectBad(row, channelIndex) + "S1x is not supported");
                             break;
-                        case 2:
+                        case 2: //unimplemented
                             Consolex.SetMessage(effectBad(row, channelIndex) + "This is not an Amiga");
                             break;
-                        case 3:
+                        case 3: //vibrato waveform
                             if ((effect.value & 0xf) > 3)
                             {
                                 Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
@@ -789,7 +812,7 @@ namespace BasicTracker
                             }
                             vibratoWaveform[channelIndex] = (effect.value & 0xf);
                             break;
-                        case 4:
+                        case 4: //tremolo waveform
                             if ((effect.value & 0xf) > 3)
                             {
                                 Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
@@ -797,7 +820,7 @@ namespace BasicTracker
                             }
                             tremoloWaveform[channelIndex] = (effect.value & 0xf);
                             break;
-                        case 5:
+                        case 5: //panbrello waveform
                             if ((effect.value & 0xf) > 3)
                             {
                                 Consolex.SetMessage(effectBad(row, channelIndex) + "Waveform " + (effect.value & 0xf) + " does not exist");
@@ -805,28 +828,28 @@ namespace BasicTracker
                             }
                             panbrelloWaveform[channelIndex] = (effect.value & 0xf);
                             break;
-                        case 6:
+                        case 6: // extension to the row
                             extension += (effect.value & 0xf);
                             break;
-                        case 7:
+                        case 7: //unimplemented
                             Consolex.SetMessage(effectBad(row, channelIndex) + "New Note Actions are not supported.");
                             break;
-                        case 8:
+                        case 8: // panning (not sure why)
                             chanPan[channelIndex] = (effect.value & 0xf) << 4;
                             break;
-                        case 9:
+                        case 9: //Special special
                             switch (effect.value & 0xf)
                             {
-                                case 0:
+                                case 0: //stop surround
                                     surround[channelIndex] = false;
                                     break;
-                                case 1:
+                                case 1: //start surround
                                     surround[channelIndex] = true;
                                     break;
-                                case 2:
+                                case 2: //stop FM
                                     AudioSubsystem.SetFM(channelIndex, false);
                                     break;
-                                case 3:
+                                case 3: //start FM
                                     AudioSubsystem.SetFM(channelIndex, true);
                                     break;
                                 default:
@@ -834,10 +857,10 @@ namespace BasicTracker
                                     break;
                             }
                             break;
-                        case 10:
+                        case 10: //unimplemented
                             Consolex.SetMessage(effectBad(row, channelIndex) + "This is not a sampler");
                             break;
-                        case 11:
+                        case 11: //pattern Looping
                             if ((effect.value & 0xf) == 0)
                             {
                                 loopPoint = row;
@@ -856,11 +879,11 @@ namespace BasicTracker
                                 }
                             }
                             break;
-                        case 12:
+                        case 12: // Note cut
                             if (tickCounter == (effect.value & 0xf))
                                 AudioSubsystem.Stop(channelIndex);
                             break;
-                        case 14:
+                        case 14: // Row loop
                             if (looped) break;
                             if (tickCounter > 0) break;
                             if (rowLoop == 0)
@@ -877,6 +900,7 @@ namespace BasicTracker
             }
         }
 
+        //! Special helper function to make the volume functions less repetitive
         private static void affectVolume(ref double variable, int value, int channelIndex)
         {
             if (value == 0xff)
@@ -917,6 +941,7 @@ namespace BasicTracker
             }
         }
 
+        //! for the x00 function, finds the previous use in a backwards linear search
         private static int findPrevious(effectParameter effect, Channel channel, int channelIndex, int row)
         {
             int value;
@@ -947,17 +972,19 @@ namespace BasicTracker
             return value;
         }
 
+        //! error helper function
         private static string effectBad(int row, int channelIndex)
         {
             return String.Format("Effect at row {0} channel {1} has invalid parameter: ", row, channelIndex);
         }
 
+        //! remove a pattern from the patterns list, and the order list
         internal static void RemovePattern(int v)
         {
             song.patterns.RemoveAt(v - 1);
-            orders = orders.Select(x => (x > v) ? (ushort)(x - 1) : x).ToList();
+            orders = orders.Select(x => (x > v) ? (ushort)(x - 1) : x).ToList(); // Removes all that match the pattern using a lambda
         }
-
+        //! Exception wrapper for the loading
         internal static void LoadFile(Stream stream)
         {
             try
@@ -972,6 +999,7 @@ namespace BasicTracker
                 Consolex.SetMessage("IOException: File is not valid");
             }
         }
+        //! Exception wrapper for the saving
         public static void SaveFile(Stream stream)
         {
             try
@@ -1194,9 +1222,15 @@ namespace BasicTracker
                 }
                 return pattern;
             }
+            //! Saves a pattern
+            /*! Saves a pattern to a byte array.
+             * 
+             * @param pattern The pattern to save
+             * 
+             * @return The encoded pattern
+             */
             private byte[] encodePattern(Pattern pattern)
             {
-                //throw new NotImplementedException();
                 int[] prevMaskVars = new int[8];
                 byte[] prevNote = new byte[8] { 255, 255, 255, 255, 255, 255, 255, 255 };
                 byte[] prevInst = new byte[8];
@@ -1252,48 +1286,6 @@ namespace BasicTracker
                                 prevEffect[channel] = note.effect;
                                 maskVar |= 8;
                             }
-                            /*if ((maskVar & 1) != 0)
-                            {
-                                byte tempnote = (byte)st.ReadByte();
-                                note.internal_note = tempnote;
-                                prevNote[channel] = tempnote;       
-                            }
-                            if ((maskVar & 2) != 0)
-                            {
-                                note.instrument = (byte)st.ReadByte();
-                                prevInst[channel] = note.instrument;
-                            }
-                            if ((maskVar & 4) != 0)
-                            {
-                                note.volume = note.decodeVolume((byte)st.ReadByte());
-                                prevVolume[channel] = note.volume;
-                            }
-                            if ((maskVar & 8) != 0)
-                            {
-                                effectParameter command = new effectParameter
-                                {
-                                    type = (effectParameter.Type)st.ReadByte(),
-                                    value = (byte)st.ReadByte()
-                                };
-                                note.effect = command;
-                                prevEffect[channel] = command;
-                            }
-                            if ((maskVar & 16) != 0)
-                            {
-                                note.internal_note = prevNote[channel];
-                            }
-                            if ((maskVar & 32) != 0)
-                            {
-                                note.instrument = prevInst[channel];
-                            }
-                            if ((maskVar & 64) != 0)
-                            {
-                                note.volume = prevVolume[channel];
-                            }
-                            if ((maskVar & 128) != 0)
-                            {
-                                note.effect = prevEffect[channel];
-                            }*/
                             int channelVar = channel + 1;
                             if (maskVar == prevMaskVars[channel])
                             {
@@ -1345,11 +1337,12 @@ namespace BasicTracker
                     song.patterns[currentPattern - 1])));
             return song.patterns.Count();
         }
-
+        //! Set the clipboard channel to the currently selected one
         public static void CopyChannel(int currentPattern, int channel)
         {
             clipboardChannel = song.patterns[currentPattern - 1].channels[channel];
         }
+        //! Set the current channel to the clipboard. Also performs the JSON deep copy.
         internal static void PasteChannel(int currentPattern, int channel)
         {
             song.patterns[currentPattern - 1].channels[channel] = (
@@ -1357,6 +1350,7 @@ namespace BasicTracker
                 JsonConvert.SerializeObject(
                     clipboardChannel)));
         }
+        //! Uses list maniplulation to rotate the entire channel down one.
         public static void RotateChannel(int currentPattern, int channel)
         {
             LinkedList<Note> q = new LinkedList<Note>(song.patterns[currentPattern - 1].channels[channel].notes);
@@ -1364,7 +1358,7 @@ namespace BasicTracker
             q.RemoveLast();
             song.patterns[currentPattern - 1].channels[channel].notes = q.ToArray();
         }
-
+        //! Check if the pattern the console switched to should have the cursor on it.
         internal static void AskForRow(int currentPattern)
         {
             if (currentPattern == orders[order])
@@ -1451,12 +1445,12 @@ namespace BasicTracker
                 }
                 get { return _internal_note; }
             }
-            private byte _internal_note;
-            public N note { get; set; }
-            public int octave { get; set; }
+            private byte _internal_note; //!< The binary representation of the note
+            public N note { get; set; } //!< The note as a text enum
+            public int octave { get; set; } //!< The octave of the note
             public byte instrument; //!< The instrument
-            public volumeParameter volume;
-            public effectParameter effect;
+            public volumeParameter volume; //!< The volume effect
+            public effectParameter effect; //!< The main effect
             public Note()
             {
                 octave = 4;

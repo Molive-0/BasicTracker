@@ -1,0 +1,8 @@
+<project outputDir="C:\Users\moliv\OneDrive\source\repos\BasicTracker\BasicTracker\Confused" baseDir="C:\Users\moliv\OneDrive\source\repos\BasicTracker\BasicTracker" debug="true" xmlns="http://confuser.codeplex.com">
+  <packer id="compressor" />
+  <module path="BasicTracker\bin\x64\Release\netcoreapp3.1\win-x64\BasicTracker.dll" />
+  <module path="bin\x64\Debug\netcoreapp3.1\publish\BasicTracker.dll" />
+  <module path="bin\x64\Release\netcoreapp3.1\BasicTracker.dll" />
+  <module path="bin\x64\Release\netcoreapp3.1\BasicTracker.exe" />
+  <module path="bin\x64\Release\netcoreapp3.1\NAudio.dll" />
+</project>
