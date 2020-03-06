@@ -68,7 +68,7 @@ namespace BasicTracker
                 wasapi.Play();
             }
         }
-        //! This is the only place in the project with a destructor. It handles closing the 
+        //! This is the only place in the project with a destructor. It handles closing the audio drivers23
         static public void Shutdown()
         {
             if (asio != null)
@@ -125,15 +125,57 @@ namespace BasicTracker
             private BufferedSampleProvider[] channelBuffers; //!< Allows the code to put the channels into something more useful
             private PanningSampleProvider[] panners; //!< panning stage
             private SurroundSampleProvider[] gainers; //!< PreGain + surround
-
+            //! Sets the gain past the FM
+            /* 
+             * @param channel Channel to affect
+             * @param valueLeft Volume of left channel between 0 and 1
+             * @param valueRight Volume of right channel between 0 and 1
+             */
             public void SetPostGain(int channel, double valueLeft, double valueRight) { gainers[channel].VolumeLeft = (float)valueLeft; gainers[channel].VolumeRight = (float)valueRight; }
+            //! Sets the gain before the FM
+            /* 
+             * @param channel Channel to affect
+             * @param value Volume of the signal between 0 and 1
+             */
             public void SetPreGain(int channel, double value) => channels[channel].SetGain(value);
+            //! Sets the FM status
+            /* 
+             * @param channel Channel to affect
+             * @param value Bool, true to enable FM
+             */
             public void SetFM(int channel, bool value) => channels[channel].SetModulation(value);
+            //! Sets the instrument
+            /* 
+             * @param channel Channel to affect
+             * @param value Instrument to swap to
+             */
             public void SetInstrument(int channel, int value) => channels[channel].SetInstrument(value);
+            //! Sets the pitch
+            /* 
+             * @param channel Channel to affect
+             * @param value Pitch in hertz
+             */
             public void SetPitch(int channel, double value) => channels[channel].SetPitch(value);
+            //! Sets the pan
+            /* 
+             * @param channel Channel to affect
+             * @param value Panning, between 0 and 255
+             */
             public void SetPan(int channel, double value) => panners[channel].Pan = (float)((value/128.0)-1.0);
+            //! Sets the master volume
+            /* 
+             * @param value volume of master, between 0 and 1
+             */
             public void SetMasterGain(double value) => masterGain.Volume = (float)(value / 8.0);
+            //! Starts the channel playing
+            /* 
+             * @param channel Channel to affect
+             */
             public void Start(int channel) => channels[channel].Start();
+            //! Stops the channel playing
+            /* 
+             * @param channel Channel to affect
+             */
             public void Stop(int channel) => channels[channel].Stop();
 
             //! Initializes a new instance for the Generator (Default :: 32Khz, 2 channels)
@@ -144,6 +186,9 @@ namespace BasicTracker
             }
 
             //! Initializes a new instance for the Generator using a WaveFormat
+            /*
+             * @param f Waveformat to take info from
+             */
             public TrackerGenerator(WaveFormat f)
                 : this(f.SampleRate, f.Channels)
             {
@@ -188,14 +233,17 @@ namespace BasicTracker
                 nSample = 0;
             }
 
-            /// <summary>
-            /// The waveformat of this WaveProvider (same as the source)
-            /// </summary>
+            //! The waveformat of this WaveProvider (same as the source)
             public WaveFormat WaveFormat => waveFormat;
 
-            /// <summary>
-            /// Reads from this provider.
-            /// </summary>
+            //! Reads from this provider.
+            /*
+             * @param buffer Sound buffer to output the sound into
+             * @param offset Where in the buffer the sound goes
+             * @param count How many samples to make * channels
+             * 
+             * @return Samples read
+             */
             public int Read(float[] buffer, int offset, int count)
             {
                 int outIndex = offset;
@@ -237,77 +285,57 @@ namespace BasicTracker
             }
         }
 
-        /// <summary>
-        /// Signal Generator type
-        /// </summary>
+        //! Signal Generator enum for which wave is playing
         public enum SignalGeneratorType
         {
-            /// <summary>
-            /// No sound.
-            /// </summary>
-            None = 0,
-            /// <summary>
-            /// Sine wave
-            /// </summary>
-            Sin,
-            /// <summary>
-            /// Square wave
-            /// </summary>
-            Square,
-            /// <summary>
-            /// Triangle Wave
-            /// </summary>
-            Triangle,
-            /// <summary>
-            /// Sawtooth wave
-            /// </summary>
-            SawTooth,
-            /// <summary>
-            /// White noise
-            /// </summary>
-            White,
+
+            None = 0,   //!< No sound.
+            Sin,        //!< Sine wave
+            Square,     //!< Square wave
+            Triangle,   //!< Triangle wave
+            SawTooth,   //!< Sawtooth wave
+            White,      //!< White noise
         }
 
+        //! Audio synth for a single channel
         private class ChannelGenerator : ISampleProvider
         {
-            // Wave format
+            //! Wave format
             private readonly WaveFormat waveFormat;
 
-            // Random Number for the White Noise
+            //! Random Number for the White Noise
             private readonly Random random = new Random();
             private int prevNSample;
             private double prevSampleValue;
 
-            // Const Math
+            //! Const Math
             private const double TwoPi = 2 * Math.PI;
 
-            // Generator variable
+            //! How far through the sample we are
             private double nSample;
 
-            // State machine code
-            private SignalGeneratorType Type;
-            private double Pitch;
-            private double Gain;
-            private double attackRamp;
-            private bool modulation;
-            private double attack;
-            private bool LFO;
+
+            private SignalGeneratorType Type;   //!< Wave type
+            private double Pitch;               //!< Pitch of audio
+            private double Gain;                //!< Volume of sound
+            private double attackRamp;          //!< Used for making notes come in softer
+            private bool modulation;            //!< Is FM on?
+            private double attack;              //!< Used for making notes come in softer
+            private bool LFO;                   //!< Is this an LFO channel?
 
 
-            /// <summary>
-            /// Initializes a new instance for the Generator (Default :: 32Khz, mono)
-            /// </summary>
+            //! Initializes a new instance for the Generator (Default :: 32Khz, mono)
             public ChannelGenerator()
                 : this(32000, 1)
             {
 
             }
 
-            /// <summary>
-            /// Initializes a new instance for the Generator (UserDef SampleRate &amp; Channels)
-            /// </summary>
-            /// <param name="sampleRate">Desired sample rate</param>
-            /// <param name="channel">Number of channels</param>
+            //! Initializes a new instance for the Generator (UserDef SampleRate & Channels)
+            /*
+             * @param sampleRate Desired sample rate
+             * @param channel Number of channels
+             */
             public ChannelGenerator(int sampleRate, int channel)
             {
                 nSample = 0;
@@ -321,15 +349,15 @@ namespace BasicTracker
                 waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(sampleRate, channel);
             }
 
-            /// <summary>
-            /// The waveformat of this WaveProvider (same as the source)
-            /// </summary>
+            //! The waveformat of this WaveProvider (same as the source)
             public WaveFormat WaveFormat => waveFormat;
 
+            //! Lowers the volume of the sample to stop it
             public void Stop()
             {
                 attackRamp = -0.01;
             }
+            //! Raises the volume over time to start it
             public void Start()
             {
                 nSample = 0;
@@ -337,27 +365,27 @@ namespace BasicTracker
                 attack = 0;
                 prevNSample = 0;
             }
+            //! Sets the instrument to the parameter
             public void SetInstrument(int inst)
             {
                 if (inst == 0) Type = SignalGeneratorType.None;
                 Type = (SignalGeneratorType)((inst - 1) % 5 + 1);
                 LFO = inst > 5;
             }
+            //! Sets the gain to the parameter
             public void SetGain(double gain) => Gain = gain;
+            //! Sets the pitch to the parameter
             public void SetPitch(double pitch) => Pitch = pitch;
+            //! Sets the modulation to the parameter
             public void SetModulation(bool b) => modulation = b;
 
-            /// <summary>
-            /// Reads from this provider.
-            /// </summary>
+            //! Reads from this provider.
             public int Read(float[] buffer, int offset, int count)
             {
                 return Read(buffer, offset, count, 1.0);
             }
 
-            /// <summary>
-            /// Reads from this provider, with FM stuff.
-            /// </summary>
+            //! Reads from this provider, with FM stuff.
             public int Read(float[] buffer, int offset, int count, double modulation)
             {
                 int outIndex = offset;
@@ -378,7 +406,7 @@ namespace BasicTracker
                         {
                             case SignalGeneratorType.Sin:
 
-                                // Sinus Generator
+                                // Sine Generator
 
                                 multiple = TwoPi * Frequency / waveFormat.SampleRate;
                                 sampleValue = Gain * Math.Sin(nSample);
@@ -471,10 +499,10 @@ namespace BasicTracker
                 return count;
             }
 
-            /// <summary>
-            /// Private :: Random for WhiteNoise &amp; Pink Noise (Value form -1 to 1)
-            /// </summary>
-            /// <returns>Random value from -1 to +1</returns>
+            //! Random for WhiteNoise (Value form -1 to 1)
+            /* 
+             * @return Ranndom value from -1 to +1
+             */
             private double NextRandomTwo()
             {
                 return 2 * random.NextDouble() - 1;
@@ -482,42 +510,37 @@ namespace BasicTracker
         }
     }
 
-    /// <summary>
-    /// Provides a buffered store of samples
-    /// Read method will return queued samples or fill buffer with zeroes
-    /// Now backed by a circular buffer
-    /// </summary>
+    //! Provides a buffered store of samples
+    /*
+     * Used to produce a sample provider version
+     * Read method will return queued samples or fill buffer with zeroes
+     * Now backed by a circular buffer
+     */
     public class BufferedSampleProvider : ISampleProvider
     {
         private float[] buffer;
         private readonly WaveFormat waveFormat;
 
-        /// <summary>
-        /// Creates a new buffered WaveProvider
-        /// </summary>
-        /// <param name="waveFormat">WaveFormat</param>
+        //! Creates a new buffered WaveProvider
+        /* 
+         * @param waveFormat WaveFormat
+         */
         public BufferedSampleProvider(WaveFormat waveFormat)
         {
             this.waveFormat = waveFormat;
             BufferLength = waveFormat.AverageBytesPerSecond * 5;
         }
 
-        /// <summary>
-        /// Buffer length in bytes
-        /// </summary>
+        //! Buffer length in bytes
         public int BufferLength { get; set; }
 
-        /// <summary>
-        /// Gets the WaveFormat
-        /// </summary>
+        //! Gets the WaveFormat
         public WaveFormat WaveFormat
         {
             get { return waveFormat; }
         }
 
-        /// <summary>
-        /// Adds samples. Takes a copy of buffer, so that buffer can be reused if necessary
-        /// </summary>
+        //! Adds samples. Takes a copy of buffer, so that buffer can be reused if necessary
         public void AddSamples(float[] buf, int offset, int count)
         {
             // create buffer here to allow user to customise buffer length
@@ -534,10 +557,9 @@ namespace BasicTracker
             Buffer.BlockCopy(buf, offset, buffer, 0, count * 4);
         }
 
-        /// <summary>
-        /// Reads from this WaveProvider
-        /// Will always return count bytes, since we will zero-fill the buffer if not enough available
-        /// </summary>
+        //! Reads from this WaveProvider
+        /* Will always return count bytes, since we will zero-fill the buffer if not enough available
+         */
         public int Read(float[] buf, int offset, int count)
         {
             if (buffer != null) // not yet created
@@ -547,22 +569,27 @@ namespace BasicTracker
             return count;
         }
 
-        /// <summary>
-        /// Discards all audio from the buffer
-        /// </summary>
+        //! Discards all audio from the buffer
         public void ClearBuffer()
         {
-            buffer = new float[BufferLength];
+            if (buffer == null)
+            {
+                buffer = new float[BufferLength];
+            }
+            else
+            {
+                Array.Clear(buffer,0,buffer.Length);
+            }
         }
     }
-    public class SurroundSampleProvider : ISampleProvider //Based on code for the VolumeSampleProvider
+    public class SurroundSampleProvider : ISampleProvider //!< Based on code for the VolumeSampleProvider
     {
         private readonly ISampleProvider source;
 
-        /// <summary>
-        /// Initializes a new instance of VolumeSampleProvider
-        /// </summary>
-        /// <param name="source">Source Sample Provider</param>
+        //! Initializes a new instance of SurroundSampleProvider
+        /*
+         * @param source Source Sample Provider
+         */
         public SurroundSampleProvider(ISampleProvider source)
         {
             this.source = source;
@@ -570,18 +597,16 @@ namespace BasicTracker
             VolumeRight = 1.0f;
         }
 
-        /// <summary>
-        /// WaveFormat
-        /// </summary>
+        //! WaveFormat
         public WaveFormat WaveFormat => source.WaveFormat;
 
-        /// <summary>
-        /// Reads samples from this sample provider
-        /// </summary>
-        /// <param name="buffer">Sample buffer</param>
-        /// <param name="offset">Offset into sample buffer</param>
-        /// <param name="sampleCount">Number of samples desired</param>
-        /// <returns>Number of samples read</returns>
+        //! Reads samples from this sample provider
+        /*
+         * @param buffer Sample buffer
+         * @param offset Offset into sample buffer
+         * @param sampleCount Number of samples desired
+         * @returns Number of samples read
+         */
         public int Read(float[] buffer, int offset, int sampleCount)
         {
             int samplesRead = source.Read(buffer, offset, sampleCount);
@@ -595,10 +620,9 @@ namespace BasicTracker
             return samplesRead;
         }
 
-        /// <summary>
-        /// Allows adjusting the volume, 1.0f = full volume
-        /// </summary>
+        //! Allows adjusting the volume, 1.0f = full volume in left channel
         public float VolumeLeft { get; set; }
+        //! Allows adjusting the volume, 1.0f = full volume in right channel
         public float VolumeRight { get; set; }
     }
 }
