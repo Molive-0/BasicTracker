@@ -716,7 +716,7 @@ namespace BasicTracker
                 // Open the help window.
                 if (key == ConsoleKey.F1)
                 {
-                    if (!helpOpen)
+                    /*if (!helpOpen)
                         new Thread(() =>
                         {
                             helpOpen = true;
@@ -724,7 +724,9 @@ namespace BasicTracker
                             MessageBox.Show(G.helpString, "Basic Tracker Help", MessageBoxButtons.OK, MessageBoxIcon.None);
                             helpOpen = false;
                         }).Start();
-                    else SetMessage("Help is already open");
+                    else SetMessage("Help is already open");*/
+
+                    Process.Start("CMD.exe", "/C start https://gist.github.com/Molive-0/29cebec10672d4e510a8beb47ed63961");
                 }
             }
         }

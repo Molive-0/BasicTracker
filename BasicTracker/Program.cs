@@ -32,6 +32,8 @@ namespace BasicTracker
             "  Song: {4} Author: {5} Octave: {6:D1} Tempo: {7:X2} Speed: {8:X2}  Instrument: {9:X2}   ";
         public static readonly Version version = typeof(Program).Assembly.GetName().Version; //!< Gets the autoincrementing version of the app. Used in checking the file formats.
         public const string helpString =
+            "Note: a much better version of this is available at https://gist.github.com/Molive-0/29cebec10672d4e510a8beb47ed63961 \n" +
+            "\n" +
             "Hello, and welcome to Basic Tracker, a music tracker program I have created for my A-Level.\n" +
             "Trackers are known for being able to render on a text only display - to this end, Basic Tracker\n" +
             "Is rendered only using the default C# console (There are a few parts in Windows Forms, due to\n" +
