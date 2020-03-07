@@ -156,26 +156,26 @@ namespace BasicTracker
         //! manually called init function so that it is run at a specific point
         public static void init()
         {
-            //! Create a new song
+            // Create a new song
             song = new Song();
-            //! Fill the waveform tables. This only works for the sine wave, as ths table technically needs to be the wave that's the differentiation of the output wave.
-            for (int i = 0; i < 256; i++) //!< Sine
+            // Fill the waveform tables. This only works for the sine wave, as ths table technically needs to be the wave that's the differentiation of the output wave.
+            for (int i = 0; i < 256; i++) // Sine
             {
                 waveformTables[0, i] = Math.Sin((i / 128.0) * Math.PI) / 8.0;
             }
-            for (int i = 0; i < 255; i++) //!< Saw
+            for (int i = 0; i < 255; i++) // Saw
             {
                 //waveformTables[1, i] = (i / 256.0) * 0.125;
                 waveformTables[1, i] = 0.125;
             }
             waveformTables[1, 255] = -32;
-            for (int i = 0; i < 255; i++) //!< Square
+            for (int i = 0; i < 255; i++) // Square
             {
                 waveformTables[2, i] = 0;
             }
             waveformTables[2, 128] = 32;
             waveformTables[2, 255] = -32;
-            Random r = new Random(); //!< Noise
+            Random r = new Random(); // Noise
             double prevrand = 0;
             double newrand;
             for (int i = 0; i < 256; i++)
@@ -186,6 +186,12 @@ namespace BasicTracker
             }
         }
         //! Called by the console to set the note to a specific value
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param note The note value to change it to
+         */
         public static void ChangeNoteAt(int pattern, int channel, int row, byte note)
         {
             if (note < pitches.Length)
@@ -197,17 +203,33 @@ namespace BasicTracker
             }
         }
         //! Called by the console to clear the note to the empty value
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         */
         public static void ClearNoteAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].internal_note = (byte)Note.N.EMPTY;
         }
         //! Places an end note.
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         */
         public static void EndNoteAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].internal_note = (byte)Note.N.END;
             //AudioSubsystem.Stop(channel);
         }
         //! Changes the octave
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param octave The octave value to change it to
+         */
         public static void ChangeOctaveAt(int pattern, int channel, int row, int octave)
         {
             Note note = song.patterns[pattern - 1].channels[channel].notes[row];
@@ -217,9 +239,16 @@ namespace BasicTracker
             }
         }
         //! Changes the volume
-        public static void ChangeVolumeAt(int pattern, int channel, int row, bool upper, byte value)
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param isUpperNibble Are we changing the upper or lower nibble of this value?
+         * @param value The volume value to change it to
+         */
+        public static void ChangeVolumeAt(int pattern, int channel, int row, bool isUpperNibble, byte value)
         {
-            if (upper)
+            if (isUpperNibble)
             {
                 song.patterns[pattern - 1].channels[channel].notes[row].volume.value &= 0x0F;
                 song.patterns[pattern - 1].channels[channel].notes[row].volume.value |= (byte)(value << 4);
@@ -231,19 +260,36 @@ namespace BasicTracker
             }
         }
         //! Clears the volume
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         */
         public static void ClearVolumeAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].volume.type = volumeParameter.Type.N;
         }
-        //! Sets the volume
+        //! Sets the volume to the V effect
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         */
         public static void SetVolumeAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].volume.type = volumeParameter.Type.V;
         }
         //! Sets the parameter for effects, with different options for the high and low nibbles
-        public static void ChangeEffectParamAt(int pattern, int channel, int row, bool upper, byte value)
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param isUpperNibble Are we changing the upper or lower nibble of this value?
+         * @param value The effect value to change it to
+         */
+        public static void ChangeEffectParamAt(int pattern, int channel, int row, bool isUpperNibble, byte value)
         {
-            if (upper)
+            if (isUpperNibble)
             {
                 song.patterns[pattern - 1].channels[channel].notes[row].effect.value &= 0x0F;
                 song.patterns[pattern - 1].channels[channel].notes[row].effect.value |= (byte)(value << 4);
@@ -255,9 +301,16 @@ namespace BasicTracker
             }
         }
         //! Sets the parameter for effects, with different options for the high and low nibbles
-        public static void ChangeInstrumentAt(int pattern, int channel, int row, bool upper, byte value)
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param isUpperNibble Are we changing the upper or lower nibble of this value?
+         * @param value The instrument value to change it to
+         */
+        public static void ChangeInstrumentAt(int pattern, int channel, int row, bool isUpperNibble, byte value)
         {
-            if (upper)
+            if (isUpperNibble)
             {
                 song.patterns[pattern - 1].channels[channel].notes[row].instrument &= 0x0F;
                 song.patterns[pattern - 1].channels[channel].notes[row].instrument |= (byte)(value << 4);
@@ -270,11 +323,22 @@ namespace BasicTracker
             }
         }
         //! Sets the effect name
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         * @param effect The letter of the effect to change it to
+         */
         public static void ChangeEffectTypeAt(int pattern, int channel, int row, char effect)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].effect.type = (effectParameter.Type)(effect - 'A' + 1);
         }
         //! Removes an effect
+        /*!
+         * @param pattern The pattern to affect
+         * @param channel The channel to affect
+         * @param row The row to affect
+         */
         public static void ClearEffectAt(int pattern, int channel, int row)
         {
             song.patterns[pattern - 1].channels[channel].notes[row].effect.type = effectParameter.Type.NONE;
@@ -285,6 +349,8 @@ namespace BasicTracker
             song.patterns.Add(new Pattern());
         }
         //! return the number of patterns in the pattern list
+        /*! @return The number of patterns in the pattern list
+         */
         public static int GetPatternCount()
         {
             return song.patterns.Count();
@@ -322,6 +388,10 @@ namespace BasicTracker
         }
 
         //! Part of the screen rendering code which turns the internal representation of a pattern into an array of lines that can be later printed to the screen.
+        /*!
+         * @param pattern Pattern to retreive
+         * @return Array of strings that make up the pattern
+         */
         public static string[] GetPatternAsString(int pattern)
         {
             Pattern pat = song.patterns[pattern - 1];
@@ -410,6 +480,10 @@ namespace BasicTracker
         }
 
         //! Executes one line. Is called when equals is pressed.
+        /*!
+         * @param v Row to execute
+         * @param pattern pattern to jump to
+         */
         internal static void RunOneLine(int v, ushort pattern)
         {
             row = v;
@@ -524,7 +598,19 @@ namespace BasicTracker
             }
         }
         //! Do all the code for the effects
-        private static void handleEffects(ref bool jumped, ref bool looped, ref int extension, int channelIndex, Channel channel, Note note, effectParameter effect)
+        /*!
+         * This is called recursively in order to do effects that are multiple other effects
+         * 
+         * @param jumped Has a jump effect run yet
+         * @param looped Has a loop effect run yet
+         * @param extension Is this row being extended
+         * @param channelIndex index of this channel for error reporting
+         * @param channel Channel to execute
+         * @param note Note to execute
+         * @param effect Effect to execute
+         */
+        private static void handleEffects(ref bool jumped, ref bool looped, ref int extension, int channelIndex,
+                                          Channel channel, Note note, effectParameter effect)
         {
             int value;
             switch (effect.type) // Main effect switch
@@ -670,7 +756,7 @@ namespace BasicTracker
                         previousVolume[channelIndex] = chanPreGain[channelIndex];
                     }
                     int upper = (value & 0xf0) >> 4;
-                    chanPreGain[channelIndex] = nonResetTickCounter++ % (upper + (value & 0xf)) < upper - 1 ? previousVolume[channelIndex] : 0; //!< Out of all of the cycle of the tremor we could be currently on, if it's in the first half have it on otherwise kill the volume.
+                    chanPreGain[channelIndex] = nonResetTickCounter++ % (upper + (value & 0xf)) < upper - 1 ? previousVolume[channelIndex] : 0; // Out of all of the cycle of the tremor we could be currently on, if it's in the first half have it on otherwise kill the volume.
                     break;
                 case effectParameter.Type.J: //Arpeggio
                     value = findPrevious(effect, channel, channelIndex, row);
@@ -901,6 +987,11 @@ namespace BasicTracker
         }
 
         //! Special helper function to make the volume functions less repetitive
+        /*!
+         * @param[inout] variable The value to affect
+         * @param value The value of the effect
+         * @param channelIndex The index of the channel for error reporting
+         */
         private static void affectVolume(ref double variable, int value, int channelIndex)
         {
             if (value == 0xff)
@@ -942,6 +1033,14 @@ namespace BasicTracker
         }
 
         //! for the x00 function, finds the previous use in a backwards linear search
+        /*!
+         * @param effect The parameter to look for
+         * @param channel The channel to look in
+         * @param channelIndex The index of the channel we recieved for error reporting
+         * @param row The row to start looking from
+         * 
+         * @return The found parameter
+         */
         private static int findPrevious(effectParameter effect, Channel channel, int channelIndex, int row)
         {
             int value;
@@ -973,18 +1072,28 @@ namespace BasicTracker
         }
 
         //! error helper function
+        /*!
+         * @param row The row of the bad effect
+         * @param channelIndex The channel of the bad effect
+         * @return String with the formatted error
+         */
         private static string effectBad(int row, int channelIndex)
         {
             return String.Format("Effect at row {0} channel {1} has invalid parameter: ", row, channelIndex);
         }
 
         //! remove a pattern from the patterns list, and the order list
+        /*!
+         * @param v index of pattern to remove
+         */
         internal static void RemovePattern(int v)
         {
             song.patterns.RemoveAt(v - 1);
             orders = orders.Select(x => (x > v) ? (ushort)(x - 1) : x).ToList(); // Removes all that match the pattern using a lambda
         }
         //! Exception wrapper for the loading
+        /*! @param stream The stream to read from
+         */
         internal static void LoadFile(Stream stream)
         {
             try
@@ -1000,6 +1109,8 @@ namespace BasicTracker
             }
         }
         //! Exception wrapper for the saving
+        /*! @param stream The stream to write to
+         */
         public static void SaveFile(Stream stream)
         {
             try
@@ -1091,6 +1202,10 @@ namespace BasicTracker
                 }
             }
 
+            //! Saves a song to a BSCM file
+            /*!
+             * @param[out] bw A binary stream which is the file to written to.
+             */
             internal void saveToFile(BinaryWriter bw)
             {
                 bw.Write(G.signature);
@@ -1134,6 +1249,7 @@ namespace BasicTracker
              * 
              * @param patlen The length of the pattern in bytes
              * @param rowlen The number of rows
+             * @param data slice to decode
              * 
              * @return The decoded pattern
              */
@@ -1323,12 +1439,16 @@ namespace BasicTracker
             }
         }
         //! Performs a deep copy on a pattern, and then places the copy at the end of the pattern list.
-        /* We perform a deep copy using Newtonsoft's Json library - this way the entire thing is turned into a string and back.
+        /*! We perform a deep copy using Newtonsoft's Json library - this way the entire thing is turned into a string and back.
          * It's the quickest way to copy something, I kid you not. https://stackoverflow.com/questions/78536/deep-cloning-objects
          * This copies the properties in the order in the actual source file. Due to this, the internal_note is defined before the
          * note and octave, so that the writing of internal note doesn't incorrectly write to note and octave.
          * IMPORTANT NOTE for when this inevitably comes up later, this only copies public things.
-         * It can't even see the private properties, so of course it can't copy them. */
+         * It can't even see the private properties, so of course it can't copy them.
+         * 
+         * @param currentPattern Pattern to affect
+         * @return index of new pattern
+         */
         internal static int CopyPattern(int currentPattern)
         {
             song.patterns.Add(
@@ -1338,11 +1458,19 @@ namespace BasicTracker
             return song.patterns.Count();
         }
         //! Set the clipboard channel to the currently selected one
+        /*!
+         * @param currentPattern Pattern to affect
+         * @param channel Channel to affect
+         */
         public static void CopyChannel(int currentPattern, int channel)
         {
             clipboardChannel = song.patterns[currentPattern - 1].channels[channel];
         }
         //! Set the current channel to the clipboard. Also performs the JSON deep copy.
+        /*!
+         * @param currentPattern Pattern to affect
+         * @param channel Channel to affect
+         */
         internal static void PasteChannel(int currentPattern, int channel)
         {
             song.patterns[currentPattern - 1].channels[channel] = (
@@ -1351,6 +1479,10 @@ namespace BasicTracker
                     clipboardChannel)));
         }
         //! Uses list maniplulation to rotate the entire channel down one.
+        /*!
+         * @param currentPattern Pattern to affect
+         * @param channel Channel to affect
+         */
         public static void RotateChannel(int currentPattern, int channel)
         {
             LinkedList<Note> q = new LinkedList<Note>(song.patterns[currentPattern - 1].channels[channel].notes);
@@ -1359,6 +1491,8 @@ namespace BasicTracker
             song.patterns[currentPattern - 1].channels[channel].notes = q.ToArray();
         }
         //! Check if the pattern the console switched to should have the cursor on it.
+        /*! @param currentPattern Patterns to check
+         */
         internal static void AskForRow(int currentPattern)
         {
             if (currentPattern == orders[order])
@@ -1376,6 +1510,7 @@ namespace BasicTracker
          */
         class Pattern
         {
+            //! The channels within a pattern
             public Channel[] channels = new Channel[G.channels];
             //! inits channels
             public Pattern()
@@ -1389,6 +1524,7 @@ namespace BasicTracker
         //! Contains notes
         class Channel
         {
+            //! The notes within a channel
             public Note[] notes = new Note[G.depth];
             //! inits notes
             public Channel()
@@ -1459,9 +1595,12 @@ namespace BasicTracker
                 volume = new volumeParameter() { type = volumeParameter.Type.N, value = 255 };
                 effect = new effectParameter() { type = effectParameter.Type.NONE, value = 0 };
             }
-            //! part of the file loading. Decodes what effect is in the volume column because of course.
+            //! Part of the file loading. Decodes what effect is in the volume column because of course.
             /*! Removed most of this code to simplify the tracker. It's a shame but I simply
              * can't implement all of this in the time allotted.
+             * 
+             * @param vol Volume to decode
+             * @return Decoded parameter
              */
             public volumeParameter decodeVolume(byte vol)
             {
@@ -1532,11 +1671,11 @@ namespace BasicTracker
 
 
         //! a data type to hold the Volume parameter
-        /* holds the value and type - but type is always "V" so that's nice
+        /*! holds the value and type - but type is always "V" so that's nice
          */
         struct volumeParameter
         {
-            public enum Type
+            public enum Type //!< The list of possible effect
             {
                 N, //!< No effect
                 A, //!< Fine Volume Slide Up
@@ -1550,15 +1689,15 @@ namespace BasicTracker
                 P, //!< Set Panning
                 V, //!< Set Volume
             }
-            public Type type;
-            public byte value;
+            public Type type; //!< The effect that the parameter has. Is always V
+            public byte value; //!< The value the parameter takes
         }
         //! a data type to hold the Effect parameter
-        /* holds the value and type.
+        /*! holds the value and type.
          */
         struct effectParameter
         {
-            public enum Type
+            public enum Type //!< The list of possible effects
             {
                 NONE = 0, //!< No effect, ---
                 A, //!< Set Speed 
@@ -1588,8 +1727,8 @@ namespace BasicTracker
                 Y, //!< Panbrello
                 Z, //!< Filter coefficients
             }
-            public Type type;
-            public byte value;
+            public Type type; //!< The effect the effect column takes
+            public byte value; //!< the value of the parameter
         }
     }
 }

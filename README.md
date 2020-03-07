@@ -64,8 +64,8 @@ To exit the program at any point press ESC.
 | eff |    Name   | mem | Description |
 | --- | --------- | --- | ------------|
 | Axx |	Set Speed |	No  |	Sets the module Speed (ticks per row).  **DOES NOT WORK**|
-| Bxx |	Position Jump |	? |	Causes playback to jump to pattern position xx. <br> B00 would restart a song from the beginning (first pattern in the Order List).|
-| Cxx |	Pattern Break |	? | Jumps to row xx of the next pattern in the Order List. <br> If the current pattern is the last pattern in the Order List, Cxx will jump to row xx of the first pattern. |
+| Bxx |	Position Jump |	- |	Causes playback to jump to pattern position xx. <br> B00 would restart a song from the beginning (first pattern in the Order List).|
+| Cxx |	Pattern Break |	- | Jumps to row xx of the next pattern in the Order List. <br> If the current pattern is the last pattern in the Order List, Cxx will jump to row xx of the first pattern. |
 | Dxy |	Volume Slide  |	Yes |	Slides the current note volume up or down. <br><br> D0y decreases note volume by y units on every tick of the row except the first. <br> Dx0 increases note volume by x units on every tick of the row except the first. <br> DFy finely decreases note volume by only applying y units on the first tick of the row. <br> y cannot be Fh <br> DxF finely increases note volume by only applying x units on the first tick of the row. <br> x cannot be Fh.
 | Exx |	Portamento Down |	Yes |	Decreases current note pitch by xx units on every tick of the row except the first. <br> EFx finely decreases note pitch by only applying x units on the first tick of the row. <br> EEx extra-finely decreases note pitch by applying with 4 times the precision of EFx. |
 | Fxx |	Portamento Up | 	Yes  |	Increases current note pitch by xx units on every tick of the row except the first. <br> EFx finely increases note pitch by only applying x units on the first tick of the row. <br> EEx extra-finely increases note pitch by applying with 4 times the precision of EFx.
@@ -75,33 +75,33 @@ To exit the program at any point press ESC.
 | Jxy |	Arpeggio |	Yes |	Plays an arpeggiation of three notes in one row, cycling between the current note, current note + x semitones, and current note + y semitones. |
 | Kxy |	Volume Slide + Vibrato |	Yes |	Functions like Dxy with H00. Parameters are used like Dxy. |
 | Lxy |	Volume Slide + Tone Portamento |	Yes |	Functions like Dxy with G00. Parameters are used like Dxy. **DOES NOT WORK**|
-| Mxx |	Set Channel Volume |	? |	Sets the current channel volume, which multiplies all note volumes it encompasses. **Makes things far too loud**|
+| Mxx |	Set Channel Volume |	- |	Sets the current channel volume, which multiplies all note volumes it encompasses. **Makes things far too loud**|
 | Nxy |	Channel Volume Slide |	Yes 	|Similar to Dxy, but applies to the current channel's volume. **Makes things far too loud**|
 | Oxx |	Parameter Extension |	Yes |	Extends the parameter of the last Bxx or Txx command. If placed after such a command, the parameter values are combined. xx is added to the parameter of the original command � 256. |
 | Pxy |	Panning Slide |	Yes |	Slides the current channel's panning position left or right. <br> P0y slides the panning to the right by y units on every tick of the row except the first. <br> Px0 slides the panning to the left by x units on every tick of the row except the first. <br>PFy finely slides the panning to the right by only applying y units on the first tick of the row. <br>y cannot be Fh. <br>PxF finely slides the panning to the left by only applying x units on the first tick of the row. <br>x cannot be Fh.
 | Qxy |	Retrigger |	Yes 	|Retriggers the current note every y ticks and changes the volume based on the x value (see the [Retrigger Volume table](#retrigger-volume-table) for more details). | 
 | Rxy |	Tremolo |	Yes |	Executes tremolo with speed x and depth y on the current note. Modulates with selected tremolo waveform. |
-| S3x |	Set Vibrato Waveform |	? |	Sets the waveform of future Vibrato effects **DOES NOT WORK** | 
-| S4x |	Set Tremolo Waveform |	? |	Sets the waveform of future Tremolo effects **DOES NOT WORK** | 
-| S5x |	Set Panbrello Waveform |	? |	Sets the waveform of future Panbrello effects **DOES NOT WORK** | 
-| S6x |	Fine Pattern Delay |	? |	Extends the current row by x ticks. **DOES NOT WORK** <br> If multiple S6x commands are on the same row, the sum of their parameters is used. |
-| S8x |	Set Panning |	? |	(Xxx is a much finer panning effect.) Sets the current channel's panning position. Ranges from 0h (left) to Fh (right). |
-| S90 |	Surround Sound Off |	? |	Disables "surround" sound for the channel. **DOES NOT WORK** |
-| S91 |	Surround Sound On |	? |	Enables "surround" sound for the channel. **DOES NOT WORK** |
-| S92 |	FM Synthesis Off |	? |	Disables frequency modulation for the channel. |
-| S93 |	FM Synthesis On |	? |	Enables frequency modulation for the channel.  Works by using the output of the channel to the left as a modulator. |
-| SB0 |	Pattern Loop Start |	? |	Marks the current row position to be used as the start of a pattern loop. |
-| SBx |	Pattern Loop |	? |	Each time this command is reached, jumps to the row marked by SB0 until x jumps have occurred in total. **LOOPS FOREVER** <br> If SBx is used in a pattern with no SB0 effect, SBx will use the row position marked by any previous SB0 effect. Pattern loops cannot span multiple patterns.|
-| SCx |	Note Cut |	? |	Stops the current sample after x ticks. <br> If x is greater than or equal to the current module Speed, this command is ignored. |
-| SDx |	Note Delay |	? |	Delays the note or instrument change in the current pattern cell by x ticks. **DOES NOT WORK** <br> If x is greater than or equal to the current module Speed, the current cell's contents are not played. |
-| SEx |	Pattern Delay |	? |	Repeats the current row x times. **SOFTLOCK** <br> Notes are not retriggered on every repetition, but effects are still processed. <br> If multiple SEx commands are on the same row, only the leftmost command is used. |
+| S3x |	Set Vibrato Waveform |	- |	Sets the waveform of future Vibrato effects **DOES NOT WORK** | 
+| S4x |	Set Tremolo Waveform |	- |	Sets the waveform of future Tremolo effects **DOES NOT WORK** | 
+| S5x |	Set Panbrello Waveform |	- |	Sets the waveform of future Panbrello effects **DOES NOT WORK** | 
+| S6x |	Fine Pattern Delay |	- |	Extends the current row by x ticks. **DOES NOT WORK** <br> If multiple S6x commands are on the same row, the sum of their parameters is used. |
+| S8x |	Set Panning |	- |	(Xxx is a much finer panning effect.) Sets the current channel's panning position. Ranges from 0h (left) to Fh (right). |
+| S90 |	Surround Sound Off |	- |	Disables "surround" sound for the channel. **DOES NOT WORK** |
+| S91 |	Surround Sound On |	- |	Enables "surround" sound for the channel. **DOES NOT WORK** |
+| S92 |	FM Synthesis Off |	- |	Disables frequency modulation for the channel. |
+| S93 |	FM Synthesis On |	- |	Enables frequency modulation for the channel.  Works by using the output of the channel to the left as a modulator. |
+| SB0 |	Pattern Loop Start |	- |	Marks the current row position to be used as the start of a pattern loop. |
+| SBx |	Pattern Loop |	- |	Each time this command is reached, jumps to the row marked by SB0 until x jumps have occurred in total. **LOOPS FOREVER** <br> If SBx is used in a pattern with no SB0 effect, SBx will use the row position marked by any previous SB0 effect. Pattern loops cannot span multiple patterns.|
+| SCx |	Note Cut |	- |	Stops the current sample after x ticks. <br> If x is greater than or equal to the current module Speed, this command is ignored. |
+| SDx |	Note Delay |	- |	Delays the note or instrument change in the current pattern cell by x ticks. **DOES NOT WORK** <br> If x is greater than or equal to the current module Speed, the current cell's contents are not played. |
+| SEx |	Pattern Delay |	- |	Repeats the current row x times. **SOFTLOCK** <br> Notes are not retriggered on every repetition, but effects are still processed. <br> If multiple SEx commands are on the same row, only the leftmost command is used. |
 | T0x |	Decrease Tempo |	Yes |	Decreases the module Tempo by x BPM on every tick of the row except the first. **CRASH**
 | T1x |	Increase Tempo |	Yes |	Increases the module Tempo by x BPM on every tick of the row except the first. **CRASH**
 | Txx |	Set Tempo |	No |	Sets the module Tempo if xx is greater than or equal to 20h. |
 | Uxy |	Fine Vibrato |	Yes 	|Similar to Hxy, but with 4 times the precision.
-| Vxx |	Set Global Volume |	? |	Sets the global volume.
+| Vxx |	Set Global Volume |	- |	Sets the global volume.
 | Wxy |	Global Volume Slide |	Yes 	|Similar to Dxy, but applies to the global volume. |
-| Xxx |	Set Panning |	? |	Sets the current channel's panning position. Ranges from 00h (left) to FFh (right). |
+| Xxx |	Set Panning |	- |	Sets the current channel's panning position. Ranges from 00h (left) to FFh (right). |
 | Yxy |	Panbrello |	Yes |	Executes panbrello with speed x and depth y on the current note. Modulates with selected panbrello waveform.
 | Zxx | Affect Filter Coefficients | No | **Not implemented** |
 
@@ -147,11 +147,11 @@ The key commands, but formatted as a table.
 | Numpad| set default octave
 | Open square bracket| lower instrument
 | Close square bracket| raise instrument 
-| F1| ?help? screen
+| F1| "help" screen
 | F2| edit title
 | F3| edit author
-| F4| edit ?starting? tempo
-| F5| edit ?starting? speed
+| F4| edit "starting" tempo
+| F5| edit "starting" speed
 | F6| enter ordering mode
 | Enter| move playback head to cursor, play single line
 | Spacebar| toggle playback
@@ -183,12 +183,12 @@ _Yxx_ sometimes has overflow errors (bugeature)
 _S91_ and _S90_ do nothing (bug)    
 _SDx_ does nothing, apparently (bug)  
 _SEx_ is a softlock (bug)  
-_S6x_ ?just breaks everything? ? my notes (bug)  
-_S3x_, _S4x_, and _S5x_ are essentially useless due to an oversight in the application of the waves. You can see what things other than the sine wave sound like, but it?s not great. (bug)  
+_S6x_ _"just breaks everything"_ - my notes (bug)  
+_S3x_, _S4x_, and _S5x_ are essentially useless due to an oversight in the application of the waves. You can see what things other than the sine wave sound like, but it's not great. (bug)  
 Major crashes involving the _ordering row_ and the playback cursor when things are _deleted from underneath it_ (BUG)  
-Don?t _drag the screen bigger_ and stuff? It _really_ doesn?t like that. (unsure on fix)  
-Some issues with _volume being saved correctly_ to disk means that everything that wasn?t assigned a volume is at _full volume_ when you reload it (BUG)  
-Apart from all those errors, it?s _perfectly fine_!
+Don't _drag the screen bigger_ and stuff? It _really_ doesn't like that. (unsure on fix)  
+Some issues with _volume being saved correctly_ to disk means that everything that wasn't assigned a volume is at _full volume_ when you reload it (BUG)  
+Apart from all those errors, it's _perfectly fine_!
 
 ## Compliation
 Compiles using Visual Studio 2019 on Windows. Requires .NET Core 3.1.100.  
@@ -212,5 +212,5 @@ Thanks!
 
 
 
-[snes]: www.wikipedia.org/wiki/snes
-[impulse]: www.wikipedia.org/wiki/Impulse_Tracker
+[snes]: https://www.wikipedia.org/wiki/snes
+[impulse]: https://www.wikipedia.org/wiki/Impulse_Tracker

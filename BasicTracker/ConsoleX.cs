@@ -35,8 +35,6 @@ namespace BasicTracker
         private static string screenMessage; //!< Thee messagee used for the message bar.
         private static Stopwatch screenTime = new Stopwatch(); //!< How long the message bar has been up, used to remove it after 3 seconds.
 
-        private static bool helpOpen = false; //!< Is the help window open? Used so that it doesn't open twice.
-
         private static bool refreshneeded = false; //!< Does the screen need to be updated? used to reduce unnessisary screen drawing.
 
         //! Empty static console constructor.
@@ -96,6 +94,10 @@ namespace BasicTracker
         /*! This is to try and fix a weird OEM bug in handling the keys pressed by the user, in that
          * sometimes the manufacturer of the keyboard changes up what all the keycodes are. We instead
          * call the windows API for converting it over because that fixes it in all cases. Hopefully.
+         * 
+         * @param key The key that was pressed
+         * @param modifiers The extra keys, like shift and control
+         * @return The key that was pressed as a character
          */
         public static char ToAscii(Keys key, Keys modifiers)
         {
@@ -111,6 +113,10 @@ namespace BasicTracker
         //! Highest bit mask.
         private const byte HighBit = 0x80;
         //! Returns modifiers on a key, like shift or control. Used for ascii conversion.
+        /*!
+         * @param modifiers The modifiers for the key, like shift and so
+         * @return A 256 byte array that is 0 if the modifier is off and 0x80 if it is on
+         */
         private static byte[] GetKeyState(Keys modifiers)
         {
             var keyState = new byte[256];
@@ -124,18 +130,37 @@ namespace BasicTracker
             return keyState;
         }
         //! Windows API ascii conversion. See the other "ToAscii" function.
+        /*! @param uVirtKey The virtual-key code to be translated.
+         * @param uScanCode The hardware scan code of the key to be translated. The high-order bit of this value is set if the key is up (not pressed).
+         * @param lpKeyState A pointer to a 256-byte array that contains the current keyboard state.
+         * @param[out] lpChar The buffer that receives the translated character or characters.
+         * @param uFlags This parameter must be 1 if a menu is active, or 0 otherwise.
+         * 
+         * @return If the specified key is a dead key, the return value is negative. Otherwise, it should be 1.
+         */
         [DllImport("user32.dll")]
         private static extern int ToAscii(uint uVirtKey, uint uScanCode,
                                           byte[] lpKeyState,
                                           [Out] StringBuilder lpChar,
                                           uint uFlags);
         //! For removing abilities.
+        /*! @param hMenu A handle to the menu to be changed.
+         * @param nPosition The menu item to be deleted, as determined by the uFlags parameter.
+         * @param wFlags Indicates how the uPosition parameter is interpreted.
+         * 
+         * @return If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.
+         */
         [DllImport("user32.dll")]
         public static extern int DeleteMenu(IntPtr hMenu, int nPosition, int wFlags);
         //! For getting handles.
+        /*! @param hWnd A handle to the window that will own a copy of the window menu.
+         * @param bRevert The action to be taken. If this parameter is FALSE, GetSystemMenu returns a handle to the copy of the window menu currently in use. The copy is initially identical to the window menu, but it can be modified. If this parameter is TRUE, GetSystemMenu resets the window menu back to the default state. The previous window menu, if any, is destroyed.
+         * @return If the bRevert parameter is FALSE, the return value is a handle to a copy of the window menu. If the bRevert parameter is TRUE, the return value is NULL.
+         */
         [DllImport("user32.dll")]
         private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
         //! For getting handles.
+        /*! @return A handle to the window used by the console associated with the calling process */
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern IntPtr GetConsoleWindow();
 
@@ -713,24 +738,15 @@ namespace BasicTracker
                         SetMessage("Rotated channel");
                     }
                 }
-                // Open the help window.
+                // Open the readme in a browser
                 if (key == ConsoleKey.F1)
                 {
-                    /*if (!helpOpen)
-                        new Thread(() =>
-                        {
-                            helpOpen = true;
-                            Thread.CurrentThread.IsBackground = true;
-                            MessageBox.Show(G.helpString, "Basic Tracker Help", MessageBoxButtons.OK, MessageBoxIcon.None);
-                            helpOpen = false;
-                        }).Start();
-                    else SetMessage("Help is already open");*/
-
                     Process.Start("CMD.exe", "/C start https://gist.github.com/Molive-0/29cebec10672d4e510a8beb47ed63961");
                 }
             }
         }
         //! Graphically try to save the song. Calls the proper output.
+        /*! @return the result of the user's button click */
         public static DialogResult SaveSong()
         {
             SaveFileDialog f = new SaveFileDialog();
@@ -748,7 +764,11 @@ namespace BasicTracker
             }
             return d;
         }
-        //! gets one hex character.
+        //! gets one hex input.
+        /*! 
+         * @param letters How many characters to accept
+         * @return The inputted value as a number
+         */
         private static int GetHexInput(int letters)
         {
             int input = 0;
@@ -763,18 +783,21 @@ namespace BasicTracker
             return input;
         }
         //! moves the cursor down, for when the playback needs to move it.
+        /*! @param row Row to move to */
         public static void rowTo(int row)
         {
             currentRow = row;
             RefreshScreen();
         }
         //! Moves the pattern over, for when the playback needs to move it.
+        /*! @param pattern Pattern to move to */
         public static void patternTo(int pattern)
         {
             currentPattern = pattern;
             RefreshScreen();
         }
         //! Sets the screen message, and start the three second timer.
+        /*! @param v The message to display */
         public static void SetMessage(string v)
         {
             screenMessage = v;
@@ -879,18 +902,18 @@ namespace BasicTracker
                 ConsoleKey.Z,
             };
         //! Processes input of notes, volumes and effects into the patterns.
-        /* @param key The key that was pressed.
+        /*! @param key The key that was pressed.
          */
         private static void ProcessKey(ConsoleKey key)
         {
             // Get the position of the cursor for later so we know what the user it inputting into.
-            int channel = (Console.CursorLeft - 3) / G.defaultBar.Length; //!< the currently selected channel
-            int row = (Console.CursorTop - 10); //!< the currently selected row
-            int interchannel = (Console.CursorLeft - 3) % G.defaultBar.Length; //!< how far through the channel the cursor is.
-            bool refresh = false; //!< Use a bool to keep track of if the screen needs to be updated for speed and code quality.
+            int channel = (Console.CursorLeft - 3) / G.defaultBar.Length; // the currently selected channel
+            int row = (Console.CursorTop - 10); // the currently selected row
+            int interchannel = (Console.CursorLeft - 3) % G.defaultBar.Length; // how far through the channel the cursor is.
+            bool refresh = false; // Use a bool to keep track of if the screen needs to be updated for speed and code quality.
             switch (interchannel)
             {
-                case 1: //<! Note
+                case 1: // Note
                     if (keymap.Contains(key))
                     {
                         Driver.ChangeNoteAt(currentPattern, channel, row, (byte)(Array.IndexOf(keymap, key) + 12 * octave)); refresh = true;
@@ -901,55 +924,55 @@ namespace BasicTracker
                         Driver.EndNoteAt(currentPattern, channel, row); refresh = true;
                     }
                     break;
-                case 3: //!< octave
+                case 3: // octave
                     if (numbers.Contains(key))
                     {
                         Driver.ChangeOctaveAt(currentPattern, channel, row, Array.IndexOf(numbers, key)); refresh = true;
                     }
                     break;
-                case 5: //!< instrument high nibble
+                case 5: // instrument high nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeInstrumentAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
                     }
                     break;
-                case 6://!< instrument low nibble
+                case 6:// instrument low nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeInstrumentAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
                     }
                     break;
-                case 8: //!< volume type
+                case 8: // volume type
                     if (key == ConsoleKey.V)
                     {
                         Driver.SetVolumeAt(currentPattern, channel, row); refresh = true;
                     }
                     break;
-                case 9: //!< volume high nibble
+                case 9: // volume high nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeVolumeAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
                     }
                     break;
-                case 10: //!< volume low nibble
+                case 10: // volume low nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeVolumeAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
                     }
                     break;
-                case 12: //!< effect type
+                case 12: // effect type
                     if (alpha.Contains(key))
                     {
                         Driver.ChangeEffectTypeAt(currentPattern, channel, row, key.ToString()[0]); refresh = true;
                     }
                     break;
-                case 13: //!< effect type high nibble
+                case 13: // effect type high nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeEffectParamAt(currentPattern, channel, row, true, (byte)Array.IndexOf(hex, key)); refresh = true;
                     }
                     break;
-                case 14: //!< effect type low nibble
+                case 14: // effect type low nibble
                     if (hex.Contains(key))
                     {
                         Driver.ChangeEffectParamAt(currentPattern, channel, row, false, (byte)Array.IndexOf(hex, key)); refresh = true;
@@ -957,26 +980,26 @@ namespace BasicTracker
                     break;
             }
 
-            if (key == ConsoleKey.Backspace) //!< clearing the notes
+            if (key == ConsoleKey.Backspace) // clearing the notes
             {
                 switch (interchannel)
                 {
                     case 1:
                     case 2:
                     case 3:
-                        Driver.ClearNoteAt(currentPattern, channel, row); //!< clear note (+ instrument)
+                        Driver.ClearNoteAt(currentPattern, channel, row); // clear note (+ instrument)
                         refresh = true;
                         break;
                     case 8:
                     case 9:
                     case 10:
-                        Driver.ClearVolumeAt(currentPattern, channel, row); //!< clear volume
+                        Driver.ClearVolumeAt(currentPattern, channel, row); // clear volume
                         refresh = true;
                         break;
                     case 12:
                     case 13:
                     case 14:
-                        Driver.ClearEffectAt(currentPattern, channel, row); //!< clear effect
+                        Driver.ClearEffectAt(currentPattern, channel, row); // clear effect
                         refresh = true;
                         break;
                 }
@@ -992,7 +1015,7 @@ namespace BasicTracker
         //! Actually redraw the entire screen.
         private static void RefreshScreenInternal()
         {
-            //! Get the header and format it
+            // Get the header and format it
             string screen = String.Format(G.header,
                 G.version.Major, G.version.Minor,
                 currentPattern,
@@ -1002,8 +1025,8 @@ namespace BasicTracker
                 Driver.Tempo, Driver.Speed,
                 instrument);
 
-            //! Generate the order list, making sure the "+"s are lined up and 
-            //! there is a "..." at the end if it goes off the end of the screen
+            // Generate the order list, making sure the "+"s are lined up and 
+            // there is a "..." at the end if it goes off the end of the screen
             List<string> orders = new List<string>();
             int len = 0;
             int pos = orderPosition;
@@ -1039,11 +1062,11 @@ namespace BasicTracker
             ordersCenter += '|';
             screen += ordersCenter + ordersTemp;
 
-            //! Write out the message
+            // Write out the message
             screen += "[ " + screenMessage.PadRight(123) + "]";
             screen += new string(' ', 126);
             screen += "   |  Channel  0  |  Channel  1  |  Channel  2  |  Channel  3  |  Channel  4  |  Channel  5  |  Channel  6  |  Channel  7  |  ";
-            //! Draw all the pattern rows to the screen buffer.
+            // Draw all the pattern rows to the screen buffer.
             string[] patterns = Driver.GetPatternAsString(currentPattern);
             string screen2 = "";
             for (int i = 0; i < patterns.Length; i++)
@@ -1051,12 +1074,12 @@ namespace BasicTracker
                 screen2 += i.ToString("d2") + " " + patterns[i] + "  ";
             }
 
-            //! Open the console's buffer as if it's a file
+            // Open the console's buffer as if it's a file
             SafeFileHandle h = CreateFile("CONOUT$", 0x40000000, 2, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
-            //! only continue if that worked.
+            // only continue if that worked.
             if (!h.IsInvalid)
             {
-                //! Create a screen buffer
+                // Create a screen buffer
                 CharInfo[] buf = new CharInfo[126 * 42];
                 SmallRect rect = new SmallRect() { Left = 0, Top = 0, Right = 126, Bottom = 42 };
                 short[] noteColours = {
@@ -1077,7 +1100,7 @@ namespace BasicTracker
                     (int)ConsoleColor.Yellow,
                 };
 
-                //! Create the colouring
+                // Create the colouring
                 short[] lineColours = new short[126];
                 int i;
                 for (i = 3; i < 124; i++)
@@ -1087,16 +1110,16 @@ namespace BasicTracker
                 lineColours[0] = (int)ConsoleColor.Blue;
                 lineColours[1] = (int)ConsoleColor.Blue;
 
-                //! Copy the start into the buffer
+                // Copy the start into the buffer
                 for (i = 0; i < screen.Length; i++)
                 {
                     buf[i].Attributes = 15;
                     buf[i].Char.UnicodeChar = screen[i];
                 }
-                //! Copy the pattern section into the buffer
+                // Copy the pattern section into the buffer
                 for (i = 0; i < screen2.Length; i++)
                 {
-                    //! Set the colour of the character... somehow
+                    // Set the colour of the character... somehow
                     buf[i + screen.Length].Attributes =
                         (short)(((i % 126 <= 1 && (i / 126) % 4 == 0) ?
                         (i / 126) % 16 == 0 ? (int)ConsoleColor.Green :
@@ -1106,7 +1129,7 @@ namespace BasicTracker
                     buf[i + screen.Length].Char.UnicodeChar = screen2[i];
                 }
 
-                //! Throw the buffer onto the screen!
+                // Throw the buffer onto the screen!
                 WriteConsoleOutput(h, buf,
                     new Coord() { X = 126, Y = 42 },
                     new Coord() { X = 0, Y = 0 },
@@ -1128,6 +1151,17 @@ namespace BasicTracker
         }
 
         //! WinAPI, used for opening console as file.
+        /*!
+         * @param fileName The name of the file or device to be created or opened. 
+         * @param fileAccess The requested access to the file or device, which can be summarized as read, write, both or neither (zero).
+         * @param fileShare The requested sharing mode of the file or device, which can be read, write, both, delete, all of these, or none.
+         * @param securityAttributes A pointer to a SECURITY_ATTRIBUTES structure that contains two separate but related data members: an optional security descriptor, and a Boolean value that determines whether the returned handle can be inherited by child processes. This parameter can be NULL.
+         * @param creationDisposition An action to take on a file or device that exists or does not exist. For devices other than files, this parameter is usually set to OPEN_EXISTING.
+         * @param flags The file or device attributes and flags, FILE_ATTRIBUTE_NORMAL being the most common default value for files.
+         * @param template A valid handle to a template file with the GENERIC_READ access right. The template file supplies file attributes and extended attributes for the file that is being created.
+         * 
+         * @return An open handle to the specified file, device, named pipe, or mail slot.
+         */
         [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         static extern SafeFileHandle CreateFile(
             string fileName,
@@ -1139,6 +1173,15 @@ namespace BasicTracker
             IntPtr template);
 
         //! WinAPI, used for writing console at once.
+        /*!
+         * @param hConsoleOutput A handle to the console screen buffer. The handle must have the GENERIC_WRITE access right. For more information, see Console Buffer Security and Access Rights.
+         * @param lpBuffer The data to be written to the console screen buffer. This pointer is treated as the origin of a two-dimensional array of CHAR_INFO structures whose size is specified by the dwBufferSize parameter.
+         * @param dwBufferSize The size of the buffer pointed to by the lpBuffer parameter, in character cells. The X member of the COORD structure is the number of columns; the Y member is the number of rows.
+         * @param dwBufferCoord The coordinates of the upper-left cell in the buffer pointed to by the lpBuffer parameter. The X member of the COORD structure is the column, and the Y member is the row.
+         * @param[in,out] lpWriteRegion A pointer to a SMALL_RECT structure. On input, the structure members specify the upper-left and lower-right coordinates of the console screen buffer rectangle to write to. On output, the structure members specify the actual rectangle that was used.
+         * 
+         * @returns A bool that is true if the command worked.
+         */
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern bool WriteConsoleOutput(
             SafeFileHandle hConsoleOutput,
@@ -1151,9 +1194,12 @@ namespace BasicTracker
         [StructLayout(LayoutKind.Sequential)]
         public struct Coord
         {
-            public short X;
-            public short Y;
-
+            public short X; //!< the X coordinate
+            public short Y; //!< the Y coordinate
+            //! Create a new coord
+            /*! @param X the X coordinate
+             * @param Y the Y coordinate
+             */
             public Coord(short X, short Y)
             {
                 this.X = X;
@@ -1165,30 +1211,30 @@ namespace BasicTracker
         [StructLayout(LayoutKind.Explicit)]
         public struct CharUnion
         {
-            [FieldOffset(0)] public char UnicodeChar;
-            [FieldOffset(0)] public byte AsciiChar;
+            [FieldOffset(0)] public char UnicodeChar; //!< The unicode version of this character
+            [FieldOffset(0)] public byte AsciiChar;   //!< The ascii version of this character
         }
 
         //! full screen character, which includes things like underline and colour.
         [StructLayout(LayoutKind.Explicit)]
         public struct CharInfo
         {
-            [FieldOffset(0)] public CharUnion Char;
-            [FieldOffset(2)] public short Attributes;
+            [FieldOffset(0)] public CharUnion Char; //!< The character at this place on screen
+            [FieldOffset(2)] public short Attributes; //!< attributes like the colour and the underline
         }
 
         //! The rectangle of the screen I want to update.
         [StructLayout(LayoutKind.Sequential)]
         public struct SmallRect
         {
-            public short Left;
-            public short Top;
-            public short Right;
-            public short Bottom;
+            public short Left; //!< coord of the left side of the shape
+            public short Top; //!< coord of the top side of the shape
+            public short Right; //!< coord of the right side of the shape
+            public short Bottom; //!< coord of the bottom side of the shape
         }
 
         //! Gets a key from the user and sets lastkey to it.
-        /* It wraps the Console.ReadKey instruction so that keys can do various things
+        /*! It wraps the Console.ReadKey instruction so that keys can do various things
         * they can't do in the original console, such as control moving far and F1 loading
         * help. If there is no key available it is non blocking, and will set it to null instead.
         */
