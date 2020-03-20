@@ -1,4 +1,4 @@
-# Writeup
+# Write up
 ## Introduction
 _Hello!_
 
@@ -9,6 +9,22 @@ A music tracker is a piece of software which allows people to write music using 
 
 The first tracker was the "Ultimate Soundtracker"\footnote{Ultimate being a misnomer here, as there was a lot to improve on.}, which was a music creation software for the Amiga line of home computers. As with other trackers, it features a series of columns, representing the channels that the Amiga could play sound on. As the song played back, a cursor moves across the screen executing the instructions in the grid as it hits them.  
 Shortly after there was the release of possibly the most famous tracker, Protracker, which built off of the code of the original to add more features and to fix various bugs.
+
+Trackers are generally aimed at computer literate people as they have a system of writing music that isn't immediately obvious. As such, I have consulted with Demosceners who use other trackers regularly in their spare time on what Basic Tracker should have and how to improve it. They are also my target audience.
+
+## How does Basic Tracker work internally?
+Basic tracker is split into three static classes\footnote{Not including the Program class that holds it all together}: ConsoleX, Driver, and AudioSubsystem. Each one class treats the other two almost like a black box, and only react to the others specifically sending them commands. For example, the Driver isn't allowed to see what the user is typing or looking at, and the AudioSubsystem is not allowed to see what the song data looks like. Due to these limits the three systems can be run entirely out of step with each other, with the three systems dealing with the other's requests at their own pace.  
+Using this method also means that each section is not entirely dependant on the others. If you wish to only have a version that played back files, rather than also editing them, you can trivially remove the ConsoleX class from the project and you should have a version where only the playback sections exist. If you wanted to create a version where the driver interpreted the song differently, for example, then as long as it produced mainly the same functions you could entirely swap out the Driver to something else and it should still playback. If you wanted to do something entirely different but still using the simulated hardware that Basic Tracker creates then both ConsoleX and Driver should be able to be removed without the AudioSubsystem throwing many, if any errors.
+
+The program follows the following diagram in how the data is passed around internally:
+
+\dotfile internalstructure.gv "The internal structure of Basic Tracker"
+
+The user provides input in the form of keypresses to the ConsoleX class. ConsoleX then takes these keypresses, and if it determines that the song needs to be edited or that the Driver should start running, it calls a function in the Driver. It also produces a graphical interface to inform the user of what has been happening.  
+The Driver class takes the song and interprets it in realtime to turn the notes in the tracker format to a list of note instructions which it sends in realtime to the AudioSubsystem. The instructions sent to the AudioSubsystem include things like set pitch or volume, or start or stop playing. Effects like vibrato are turned into many pitch sets.\footnote{You'll notice in the diagram that there is a greyed out line from the Driver back to ConsoleX. This is because there is some functions in the Driver that reference it, even though they probably don't need to.This also breaks the ability to entirely remove ConsoleX, but it shouldn't be too hard to fix it so that Driver does not reference ConsoleX.}  
+The AudioSubsystem is then run forever in a loop without ever consulting the other two sections. It takes note of what the Driver tells it, and stores that into variables. It then is called by the Windows API to produce sound for a certain length of time, and so it takes whatever the variables happen to be at that time and produces sound based entirely on that. By streaming note updates to the AudioSubsystem from the Driver Basic Tracker can create music.  
+Because of this disconnected nature of the project, if one section suddenly fails higher in the chain the ones below it should keep working. A good example of this is how the Run One Row feature works, as the row is only executed for the length of the row but the AudioSubsystem keeps outputting music forever (or until it gets annoying and you press tab). 
+
 
 ## Design
 My tracker is influenced by three main sources.
@@ -28,8 +44,117 @@ Here is a design stage drawing of the screen.
 As you can see this is very close to the final version, but a few changes were made, notably the replacement of the mostly useless length of the song with the instrument selector and the placement of the row numbers to the left of the columns. The entire tracker was also going to be black and white for a lot of development, and the colours were added halfway through after switching to the low level console drawing method which made them possible.
 
 ### File Format and features
-The file format was one of the first things to be created, and is based heavily on the file format for Impulse Tracker files. This was done because Impulse Tracker is a well used and stable tracker and therefore the file format is very suitable for compressing and storing the data for a song in very small amounts. I do not think I have seen a file pass a few kilobytes in size.  
-The format describes a 
+The file format was one of the first things to be created, and is based heavily on the file format for Impulse Tracker files. This was done because Impulse Tracker is a well used and stable tracker and therefore the file format is very suitable for compressing and storing the data for a song in very small amounts. I do not think I have seen a Basic Tracker file pass a few kilobytes in size.
+
+\pagebreak
+
+The design stage for the file format is as follows:
+
+**Header Data**  
+|     | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
+|:-----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0000 |'B'|'S'|'C'|'M'| Song Name, max 30 characters, NULL is underscore   ||||||||||||
+|0010 | Song Name continued... ||||||||||||||||
+|0020 |Song N.|| Author Name, max 30 characters, NULL is underscore ||||||||||||||
+|0030 |Author Name continued||||||||||||||||
+|0040 |OrdNum ||PatNum || Cwt/v || Cmwt  ||      Reserved     ||||||IS |IT|
+|0050 | Orders, Length = OrdNum                                       ||||||||||||||||
+|xxxx | 'Long' Offset of patterns, Length = PatNum*4 (offset 1)       ||||||||||||||||
+
+```
+(offset 1) = 0050h+OrdNum
+
+      Cwt:      Created with tracker.
+                 Basic Tracker y.xx = 1yxxh
+      Cmwt:     Compatible with tracker with version greater than value.
+                 (ie. format version) (not checked)
+      OrdNum:   Number of orders in song.
+      PatNum:   Number of patterns in song
+      
+      Res.: Reserved, unused
+      IS:       Initial Speed of song.
+      IT:       Initial Tempo of song
+      Orders:   This is the order in which the patterns are played.
+                 Valid values are from 0->65530.
+                 65534 = "---", End of song marker
+                 65535 = "+++", Skip to next order
+```
+Pattern data
+|     | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | A | B | C | D | E | F |
+|:-----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+|0000 |Length || Packed data................                           ||||||||||||||
+```
+Length:   Length of packed pattern, not including the 2 byte header
+                Note that the pattern + the 2 byte header will ALWAYS
+                be less than 64k
+                
+Patterns are unpacked by the following pseudocode:
+Assume previous values only exist for the pattern they are in.
+
+For each row:
+GetNextChannelMarker:
+        Read byte into channelvariable.
+        if(channelvariable = 0) then end of row
+        Channel = (channelvariable-1) & 7              ; Channel is 0 based.
+        if(channelvariable & 128) then read byte into maskvariable
+          else maskvariable = previousmaskvariable for current channel
+if(maskvariable & 1), then read note. (byte value)
+                // Note ranges from 0->119 (C-0 -> B-9)
+                // 255 = note off, 254 = notecut
+                // Others = note fade (already programmed into IT's player
+                //                     but not available in the editor)
+if(maskvariable & 2), then read instrument (byte value)
+                // Instrument ranges from 1->99
+if(maskvariable & 4), then read volume/panning (byte value)
+                // Volume ranges from 0->64
+                // Panning ranges from 0->64, mapped onto 128->192
+                // Prepare for the following also:
+                //  65->74 = Fine volume up
+                //  75->84 = Fine volume down
+                //  85->94 = Volume slide up
+                //  95->104 = Volume slide down
+                //  105->114 = Pitch Slide down
+                //  115->124 = Pitch Slide up
+                //  193->202 = Portamento to
+                //  203->212 = Vibrato
+Effects 65 is equivalent to D0F, 66 is equivalent to D1F -> 74 = D9F
+        Similarly for 75-84 (DFx), 85-94 (Dx0), 95->104 (D0x).
+(Fine) Volume up/down all share the same memory (NOT shared with Dxx
+        in the effect column tho).
+Pitch slide up/down affect E/F/(G)'s memory - a Pitch slide
+        up/down of x is equivalent to a normal slide by x*4
+Portamento to (Gx) affects the memory for Gxx and has the equivalent
+        slide given by this table:
+SlideTable      DB      1, 4, 8, 16, 32, 64, 96, 128, 255
+Vibrato uses the same 'memory' as Hxx/Uxx.
+if(maskvariable & 8), then read command (byte value) and commandvalue
+                // Valid ranges from 0->37 (0=no effect, 1=A, 2=B, 3=C, etc.)
+if(maskvariable & 16), then note = lastnote for channel
+        if(maskvariable & 32), then instrument = lastinstrument for channel
+        if(maskvariable & 64), then volume/pan = lastvolume/pan for channel
+        if(maskvariable & 128), then {
+                command = lastcommand for channel and
+                commandvalue = lastcommandvalue for channel
+        }
+        Goto GetNextChannelMarker
+```
+The file is a binary file.
+
+The header is at the start of the file, and defines several global things such as the author and title. It also contains the letters "BSCM", which denotes that this is a Basic Tracker file. If these letters are not found, the file will not be opened.  
+The main sections that follow one after the other are the patterns. They can be found by reading the pattern pointers in the header and by reading the length at the start, or they can be found by simply abusing the fact that each one is in order and follows on immediately from the last.  
+The pattern sections are designed to have a form of RLE (run length encoding) built into them, where if a note, instrument, volume or effect in a channel is the same as the previous note in that channel a flag is set instead of repeating the information. This saves one byte per note encoded for the note, instrument, and volume and two bytes per note for the effect. If a note is entirely identical to the one above it, it is encoded in only one byte, but one that is entirely different takes six.  
+There is also optimizations in that if a channel is empty for any given row it is skipped in the file, and as such a row that is empty has no channels which saves further bytes. Altogther the result is a file that is significantly smaller than without the optimisations.\footnote{Although this was probably much more important back in the 90s than it is now.}
+
+There is a bug in the saving/loading of files where a note that has no volume will be assigned one at full volume, which ruins songs. This is being looked into.
+
+As part of the file structure you'll see a section that is the current version and the versions that this file can be supported by. This is to make sure versions of the program will support files into the future. It is not currently implemented, but the way this would work is that the program has a list of versions that it will open, up to the version that it is. The program checks the creation version on load, and if that version is not in that list it doesn't load. This works for versions that are less than the current version (as otherwise they would be in the list) but for versions higher than the current one (future releases) the program cannot know if it is able to load the file. The simple thing to do would be to ignore the file completely, but there is a second parameter in the file which is the earliest version that can load it. If the version of basictracker is after this value, even if the tracker cannot tell, the file seems to think the tracker can load it and so it can try and load. For all other cases the file should be ignored to stop corruption of files.
+
+### Hardware mockup
+Basic Tracker is designed to be an old-school tracker reminicent of the ones from the 90s. As such, it attempts to emulate a hardware system that the software would be running on. The system that it tries to emulate is the [SNES].  
+The SNES features 8 channels of sound that can be any waveform, but Basic Tracker is limited to only simple waves\footnote{I was not quite sure how to implement a sample editor only in text mode.}. It also features ADSR envelopes that are not implemented\footnote{Same reason as above.}. Mainly it supports the noise effect that is built into hardware (rather than being a sample) and the FM effect, that allows for very complicated effects. The audio system is also designed in a way such that the driver does most of the heavy lifting, so complicated effects are run in software rather than hardware. It is in this way that theoretically, any Basic Tracker file should playback on a SNES.  
+Most of this work was done in my own experience of a lack of SNES based music software (or at least ones that perform all features). Two other features that I would like to add would be filter effects using the Zxx macro and the ability to use the hardware echo that the SNES supports. Unfortunately, the implementation of the echo eluded me and it was never coded.  In order to create a feature complete tracker however the ASDR and sample editing would have to be added, which is much beyond my coding ability.  
+
+
 
 ## User Feedback
 
@@ -42,7 +167,7 @@ The format describes a
 > **Molive**  13:56  
 > I'd be great if someone could test it and tell me what could be improved and stuff  
 > 13:56  
-> https://1drv.ms/u/s!Aje7F8jr0d_BhrpudsGel9rk2oFjBg?e=GOjQoV
+> https://1drv.ms/u/s!******************************
 > 13:57  
 > Thanks!
 > 
@@ -129,7 +254,7 @@ The format describes a
 > a page showing what all the commands are would be REALLY helpful
 > 
 > **LiSU**  21:09  
-> an option to export as a pokey\footnote{"POKEY" was the name of the sound chip from that Atari 8-bit range of home computers. It also controlled things like the keyboard.} tune would be even cooler! (I'm suffering from the lack of pokey trackers)
+> an option to export as a pokey\footnote{"POKEY" was the name of the sound chip from the Atari 8-bit range of home computers. It also controlled things like the keyboard.} tune would be even cooler! (I'm suffering from the lack of pokey trackers)
 > 
 > **Molive**  23:53  
 > It's kinda designed with the SNES in mind, you should be able to export it directly to SNES  
