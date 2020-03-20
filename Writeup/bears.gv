@@ -1,0 +1,5 @@
+digraph {
+    "Sun Bear" -> "Sloth" -> "Asian Black" -> "American Black" -> "Brown Bear" -> "Polar Bear";
+    "Brown Bear" [color=brown];
+    "Polar Bear" [color=gray];
+}

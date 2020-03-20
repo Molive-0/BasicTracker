@@ -1,0 +1,14 @@
+digraph structure {
+    ConsoleX [shape=box];
+    Driver [shape=box];
+    AudioSubsystem [shape=box];
+    ConsoleX -> Driver -> AudioSubsystem;
+    Driver -> ConsoleX [color=gray];
+    User [color=gray];
+    User -> ConsoleX;
+    ConsoleX -> User;
+    Windows [color=gray];
+    AudioSubsystem -> Windows;
+    Windows -> AudioSubsystem;
+    { rank=min; User };
+}
