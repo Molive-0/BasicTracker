@@ -553,7 +553,7 @@ namespace BasicTracker
                         handleEffects(ref jumped, ref looped, ref extension, channelIndex, channel, note, note.effect);
                     //Update the audio subsystem
                     AudioSubsystem.SetPitch(channelIndex, chanPitch[channelIndex]);
-                    AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 255.0f);
+                    AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 256.0f);
                     AudioSubsystem.SetPreGain(channelIndex, Math.Max(Math.Min(chanPreGain[channelIndex] / 255.0, 1.0), 0.0));
                     AudioSubsystem.SetPostGain(channelIndex, chanPostGain[channelIndex]/255.0, chanPostGain[channelIndex]/255.0 * (surround[channelIndex] ? -1 : 1));
                 }
