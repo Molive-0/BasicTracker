@@ -188,7 +188,7 @@ _S3x_, _S4x_, and _S5x_ are essentially useless due to an oversight in the appli
 Major crashes involving the _ordering row_ and the playback cursor when things are _deleted from underneath it_ (BUG)  
 Don't _drag the screen bigger_ and stuff? It _really_ doesn't like that. (unsure on fix)  
 Some issues with _volume being saved correctly_ to disk means that everything that wasn't assigned a volume is at _full volume_ when you reload it (BUG)~~
-_See issue tracker_
+_See issue tracker_  
 Apart from all those errors, it's _perfectly fine_!
 
 ## Compliation
