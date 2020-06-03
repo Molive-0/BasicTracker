@@ -169,7 +169,7 @@ The key commands, but formatted as a table.
 | Control S| save file
 
 ## Known issues
-_Axx_ does not work correctly (bug)  
+~~_Axx_ does not work correctly (bug)  
 _Bxx_ and _Cxx_ do not work together (bug)  
 _Mxx_ and _Nxx_ make things far too loud (bug)  
 _Txx_, for all intents and purposes, crashes the program (bug)  
@@ -179,7 +179,7 @@ _Volume_ can overflow I think (feature)
 There are _clicky noises_ every time a note starts?? (feature)  
 _S0x_, _S1x_, _S2x_, _S7x_, and _SAx_ are not implemented (intended)  
 _SBx_ loops forever (bug)  
-_Yxx_ sometimes has overflow errors (bugeature) _NOTE: Cause may have been found, attempting fix_
+_Yxx_ sometimes has overflow errors (bugeature)
 _S91_ and _S90_ do nothing (bug)    
 _SDx_ does nothing, apparently (bug)  
 _SEx_ is a softlock (bug)  
@@ -187,7 +187,8 @@ _S6x_ _"just breaks everything"_ - my notes (bug)
 _S3x_, _S4x_, and _S5x_ are essentially useless due to an oversight in the application of the waves. You can see what things other than the sine wave sound like, but it's not great. (bug)  
 Major crashes involving the _ordering row_ and the playback cursor when things are _deleted from underneath it_ (BUG)  
 Don't _drag the screen bigger_ and stuff? It _really_ doesn't like that. (unsure on fix)  
-~~Some issues with _volume being saved correctly_ to disk means that everything that wasn't assigned a volume is at _full volume_ when you reload it (BUG)~~ Fixed in 0.3
+Some issues with _volume being saved correctly_ to disk means that everything that wasn't assigned a volume is at _full volume_ when you reload it (BUG)~~
+_See issue tracker_
 Apart from all those errors, it's _perfectly fine_!
 
 ## Compliation
