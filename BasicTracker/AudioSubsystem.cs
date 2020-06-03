@@ -55,8 +55,7 @@ namespace BasicTracker
             }
             if (!worked)
             {
-                MessageBox.Show("We couldn't load an ASIO driver for this system, so we're falling back on a wasapi implementation. " +
-                    "If you want an ASIO driver, ASIO4ALL is free and tends to work great.", "ASIO error",
+                MessageBox.Show("We couldn't load an ASIO driver for this system, so we're falling back on a wasapi implementation.", "ASIO error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 input = i;
             }
@@ -310,7 +309,6 @@ namespace BasicTracker
         //! Signal Generator enum for which wave is playing
         public enum SignalGeneratorType
         {
-
             None = 0,   //!< No sound.
             Sin,        //!< Sine wave
             Square,     //!< Square wave

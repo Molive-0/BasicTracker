@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Windows.Forms;
 
-[assembly: AssemblyVersion("0.2.*")] //define the auto incrementing build version.
+[assembly: AssemblyVersion("0.3.*")] //define the auto incrementing build version.
 
 //! The main namespace for Basic Tracker. All code should be in this namespace.
 namespace BasicTracker
@@ -24,13 +24,14 @@ namespace BasicTracker
         public const int channels = 8; //!< How many channels there are, duh.
         public const int width = 15 * 8; //!< defaultBar.Length * channels, the columns needed for the screen.
         public static readonly char[] signature = { 'B', 'S', 'C', 'M' }; //!< The four characters at the very start of the file format. Used for file recognition, so that you can quickly see if a file is a Basic Tracker file.
-        //! A ridiculous string which contains the starting state of the header for the GUI. It's really long because it if it reaches the end of a line it automatically goes to the next line and so I can't put a new line there. So it's just a really long line. It's a mess really, don't look at it.
+        //! A ridiculous string which contains a replaceable version of the header for the GUI. Used during rendering.
         public const string header =
             "  +---------------+---------------+------------------------------+   +-----------------+---------------+                      " +
             "  | BASIC TRACKER | Version: {0:D1}.{1:D2} | Made by John \"Molive\" Hunter |   | EDITING PATTERN | {2:D5} / {3:D5} |   PRESS F1 FOR HELP  " +
             "  +---------------+---------------+------------------------------+   +-----------------+---------------+                      " +
             "  Song: {4} Author: {5} Octave: {6:D1} Tempo: {7:X2} Speed: {8:X2}  Instrument: {9:X2}   ";
         public static readonly Version version = typeof(Program).Assembly.GetName().Version; //!< Gets the autoincrementing version of the app. Used in checking the file formats.
+        public static readonly Version lastcompatible = new Version("0.3"); //!< The earliest version of the format this tracker can open.
         public const int MF_BYCOMMAND = 0x00000000; //!< Flags for following commands.
         public const int SC_CLOSE = 0xF060; //!< Code to remove the ability to close the app >:)
         public const int SC_MINIMIZE = 0xF020; //!< Code to remove the ability to minimize the app. Unused.
@@ -63,10 +64,10 @@ namespace BasicTracker
             {
                 do
                 {
+                    Application.DoEvents();
                     Consolex.RefreshKeys();
                     Consolex.handleMovement();
                     Consolex.handleScreen();
-                    Application.DoEvents();
                     Driver.ExecuteRow();
                     waitOnTick();
                 } while (Consolex.GetKey() != ConsoleKey.Escape);

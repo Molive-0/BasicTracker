@@ -5,6 +5,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 
 namespace BasicTracker
 {
@@ -19,7 +20,7 @@ namespace BasicTracker
         private static Channel clipboardChannel = new Channel(); //!< The clipboard for the channel copypaste
 
         static double[] chanPreGain = new double[] { 255, 255, 255, 255, 255, 255, 255, 255 }; //!< The pre gain for each channel, before the FM
-        static double[] chanPostGain = new double[] { 1, 1, 1, 1, 1, 1, 1, 1 }; //!< The post gain for each channel, after the FM
+        static double[] chanPostGain = new double[] { 255, 255, 255, 255, 255, 255, 255, 255 }; //!< The post gain for each channel, after the FM
         static double[] chanPitch = new double[] { 440, 440, 440, 440, 440, 440, 440, 440 }; //!< The pitch for each channel in hertz
         static double[] chanPan = new double[] { 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f, 0x7f }; //!< The panning for each channel
         static double masterGain = 255; //!< master gain level, between 0 and 255
@@ -461,7 +462,7 @@ namespace BasicTracker
         private static void resetVariables()
         {
             Array.Fill(chanPreGain, 255);
-            Array.Fill(chanPostGain, 1);
+            Array.Fill(chanPostGain, 255);
             Array.Fill(chanPitch, 440);
             Array.Fill(chanPan, 0x7f);
             masterGain = 255;
@@ -539,7 +540,7 @@ namespace BasicTracker
                                 AudioSubsystem.Start(channelIndex);
                             }
                         }
-                        if (note.volume.type != volumeParameter.Type.N) // If no volume don't do anything
+                        if (note.volume.type != volumeParameter.Type.N) // If no volume, don't do anything
                         {
                             if (note.volume.type == volumeParameter.Type.V)
                             {
@@ -554,7 +555,7 @@ namespace BasicTracker
                     AudioSubsystem.SetPitch(channelIndex, chanPitch[channelIndex]);
                     AudioSubsystem.SetPan(channelIndex, (float)chanPan[channelIndex] % 255.0f);
                     AudioSubsystem.SetPreGain(channelIndex, Math.Max(Math.Min(chanPreGain[channelIndex] / 255.0, 1.0), 0.0));
-                    AudioSubsystem.SetPostGain(channelIndex, chanPostGain[channelIndex], chanPostGain[channelIndex] * (surround[channelIndex] ? -1 : 1));
+                    AudioSubsystem.SetPostGain(channelIndex, chanPostGain[channelIndex]/255.0, chanPostGain[channelIndex]/255.0 * (surround[channelIndex] ? -1 : 1));
                 }
                 if (masterGain > 255) // clamp the volume
                 {
@@ -563,12 +564,12 @@ namespace BasicTracker
                 else if (masterGain < 0) masterGain = 0;
                 AudioSubsystem.SetMasterGain(masterGain / 255.0);
 
-                if (tickCounter == Speed+extension) // Make the tickcounter work
+                if (tickCounter >= Speed+extension) // Make the tickcounter work
                 {
                     tickCounter = 0;
                 }
                 else
-                if (++tickCounter == Speed+extension)
+                if (++tickCounter >= Speed+extension)
                 {
                     if (PlayRows > 0)
                     {
@@ -1107,6 +1108,10 @@ namespace BasicTracker
             {
                 Consolex.SetMessage("IOException: File is not valid");
             }
+            catch (FileFormatException e)
+            {
+                Consolex.SetMessage("Error on file version: " + e.Message);
+            }
         }
         //! Exception wrapper for the saving
         /*! @param stream The stream to write to
@@ -1148,8 +1153,8 @@ namespace BasicTracker
                 songname = "";
                 authorname = "";
                 orders = new List<ushort> { 1 };
-                createdVersion = typeof(Program).Assembly.GetName().Version;
-                compatibleVersion = createdVersion;
+                createdVersion = G.version;
+                compatibleVersion = G.lastcompatible;
                 globalVol = 0x7F;
                 speed = 0x08;
                 tempo = 0x40;
@@ -1168,19 +1173,50 @@ namespace BasicTracker
                 {
                     throw new IOException();
                 }
+                // Check the SHA-256 hash
+                using (SHA256 sha = SHA256.Create())
+                {
+                    br.BaseStream.Seek(36, SeekOrigin.Begin);
+                    byte[] livehash = sha.ComputeHash(br.BaseStream);
+                    br.BaseStream.Seek(4, SeekOrigin.Begin);
+                    byte[] filehash = new byte[32];
+                    br.Read(filehash, 0, 32);
+                    if (!filehash.SequenceEqual(livehash))
+                    {
+                        throw new FileFormatException("SHA256 file check failed");
+                    }
+                }
+                // The versioning system has been moved to the front of the file since 0.03 to let the file be determined without reading too much of the file.
+                ushort tempver = br.ReadUInt16();
+                Version createdVersionTemp = new Version(
+                    tempver & 0x0F00 >> 12,
+                    tempver & 0x00FF);
+                tempver = br.ReadUInt16();
+                Version compatibleVersionTemp = new Version(
+                    tempver & 0x0F00 >> 12,
+                    tempver & 0x00FF);
+                if (createdVersionTemp > G.version) // This song was created in a newer version of the tracker
+                {
+                    if (compatibleVersionTemp > G.version) // This version isn't compatible with the new format
+                    {
+                        throw new FileFormatException("Format is too new");
+                    }
+                }
+                else if (createdVersionTemp < G.version) // This song was created in an older version of the tracker
+                {
+                    if (createdVersionTemp < G.lastcompatible) // This version isn't compatible with the old format
+                    {
+                        throw new FileFormatException("Format is too old");
+                    }
+                }
+                createdVersion = createdVersionTemp;
+                compatibleVersion = compatibleVersionTemp;
+
                 songname = new string(br.ReadChars(30));
                 authorname = new string(br.ReadChars(30));
                 orders = new List<ushort>(br.ReadUInt16());
                 patterns = new List<Pattern>(br.ReadUInt16());
                 uint[] patternPtr = new uint[patterns.Capacity];
-                ushort tempver = br.ReadUInt16();
-                createdVersion = new Version(
-                    tempver & 0x0F00 >> 12,
-                    tempver & 0x00FF);
-                tempver = br.ReadUInt16();
-                compatibleVersion = new Version(
-                    tempver & 0x0F00 >> 12,
-                    tempver & 0x00FF);
                 br.ReadChars(6); //reserved bytes
                 globalVol = 0;
                 speed = br.ReadByte();
@@ -1209,13 +1245,14 @@ namespace BasicTracker
             internal void saveToFile(BinaryWriter bw)
             {
                 bw.Write(G.signature);
+                bw.Seek(32, SeekOrigin.Current); // leave space for the hash
+                bw.Write((ushort)(((createdVersion.Major & 0xF) << 12) | (createdVersion.Minor & 0xFF)));
+                bw.Write((ushort)(((compatibleVersion.Major & 0xF) << 12) | (compatibleVersion.Minor & 0xFF)));
                 bw.Write(songname.PadRight(30, '_').ToCharArray());
                 bw.Write(authorname.PadRight(30, '_').ToCharArray());
                 bw.Write((ushort)orders.Count());
                 bw.Write((ushort)patterns.Count());
                 uint[] patternPtr = new uint[patterns.Count()];
-                bw.Write((ushort)(((createdVersion.Major & 0xF) << 12) | (createdVersion.Minor & 0xFF)));
-                bw.Write((ushort)(((compatibleVersion.Major & 0xF) << 12) | (compatibleVersion.Minor & 0xFF)));
                 bw.Write(new char[] { '\0', '\0', '\0', '\0', '\0', '\0', });
                 bw.Write(Speed);
                 bw.Write(Tempo);
@@ -1241,6 +1278,15 @@ namespace BasicTracker
                 foreach (uint i in patternPtr)
                 {
                     bw.Write(i);
+                }
+                bw.Flush();
+                // Create the SHA-256 hash
+                using (SHA256 sha = SHA256.Create())
+                {
+                    bw.Seek(36, SeekOrigin.Begin);
+                    byte[] livehash = sha.ComputeHash(bw.BaseStream);
+                    bw.Seek(4, SeekOrigin.Begin);
+                    bw.Write(livehash);
                 }
             }
 
@@ -1313,7 +1359,7 @@ namespace BasicTracker
                             else
                             if ((maskVar & 4) != 0)
                             {
-                                note.volume = note.decodeVolume((byte)st.ReadByte());
+                                note.volume = note.decodeVolume((byte)st.ReadByte(), (byte)st.ReadByte());
                                 prevVolume[channel] = note.volume;
                             }
                             if ((maskVar & 128) != 0)
@@ -1423,6 +1469,7 @@ namespace BasicTracker
                             }
                             if ((maskVar & 4) != 0)
                             {
+                                st.WriteByte((byte)note.volume.type);
                                 st.WriteByte(note.volume.value);
                             }
                             if ((maskVar & 8) != 0)
@@ -1602,7 +1649,7 @@ namespace BasicTracker
              * @param vol Volume to decode
              * @return Decoded parameter
              */
-            public volumeParameter decodeVolume(byte vol)
+            public volumeParameter decodeVolume(byte type, byte vol)
             {
                 volumeParameter param = new volumeParameter();
                 /*if (vol <= 64)
@@ -1664,7 +1711,7 @@ namespace BasicTracker
                     throw new Exception("Unknown volume value");
                 }*/
                 param.value = vol;
-                param.type = volumeParameter.Type.V;
+                param.type = (volumeParameter.Type)(type);
                 return param;
             }
         }
