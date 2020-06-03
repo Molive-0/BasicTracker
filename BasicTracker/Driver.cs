@@ -1458,6 +1458,7 @@ namespace BasicTracker
                             {
                                 st.WriteByte((byte)channelVar);
                                 st.WriteByte((byte)maskVar);
+                                prevMaskVars[channel] = maskVar;
                             }
                             if ((maskVar & 1) != 0)
                             {
