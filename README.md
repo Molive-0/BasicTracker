@@ -206,7 +206,7 @@ Use publish to compile to a single, large exe file.
 
 ## Final words
 
-I'd appreciate feedback! You can reach me by email at [here](mailto:moliveofscratch+basictracker@("from%20basictracker%20readme")gmail.com). I need people to give advice on how to make this program better for the A-Level write-up so it'd be very useful.  
+I'd appreciate feedback! You can reach me by email at [here](mailto:moliveofscratch+basictracker@("from%20basictracker%20readme")gmail.com). ~~I need people to give advice on how to make this program better for the A-Level write-up so it'd be very useful.~~ hahahahahahaha  
 Thanks!  
     ~Molive
 
