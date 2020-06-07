@@ -275,6 +275,7 @@ namespace BasicTracker
                                         // If we deleted from under ourselves, move us over.
                                         if (orderPosition >= Driver.orders.Count()) orderPosition--;
                                         if (currentPattern > Driver.GetPatternCount()) currentPattern--;
+                                        Driver.FixOrderPointer();
                                         RefreshScreen();
                                     }
                                 }
@@ -283,6 +284,7 @@ namespace BasicTracker
                             {
                                 Driver.orders.RemoveAt(orderPosition);
                                 if (orderPosition >= Driver.orders.Count()) orderPosition--;
+                                Driver.FixOrderPointer();
                                 RefreshScreen();
                             }
                         }

@@ -388,6 +388,12 @@ namespace BasicTracker
             get { return song.orders; }
         }
 
+        //! When an order is deleted, the order pointer may be left pointing at an entry that doesn't exist.
+        public static void FixOrderPointer()
+        {
+            if (order >= orders.Count()) order = orders.Count() - 1;
+        }
+
         //! Part of the screen rendering code which turns the internal representation of a pattern into an array of lines that can be later printed to the screen.
         /*!
          * @param pattern Pattern to retreive
