@@ -378,7 +378,10 @@ namespace BasicTracker
         //! Alias for the song's tempo
         public static byte Tempo
         {
-            set { song.tempo = value; }
+            set {
+                if (value < 0x20) song.tempo = 0x20;
+                else song.tempo = value;
+            }
             get { return song.tempo; }
         }
         //! Alias for the song's order list

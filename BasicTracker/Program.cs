@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Windows.Forms;
 
 [assembly: AssemblyVersion("0.4.*")] //define the auto incrementing build version.
+[assembly: AssemblyFileVersion("0.4.0.0")]
 
 //! The main namespace for Basic Tracker. All code should be in this namespace.
 namespace BasicTracker

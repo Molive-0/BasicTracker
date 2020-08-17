@@ -307,7 +307,7 @@ namespace BasicTracker
         }
 
         //! Signal Generator enum for which wave is playing
-        public enum SignalGeneratorType
+        private enum SignalGeneratorType
         {
             None = 0,   //!< No sound.
             Sin,        //!< Sine wave
